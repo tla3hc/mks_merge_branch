@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 
 class AppView:
     def __init__(self, root):
@@ -88,6 +89,39 @@ class AppView:
         
         # Return the selected value
         return selected_value.get()
+    
+    def select_files(self, file_list):
+        # Create a new Tkinter window for the file selection dialog
+        popup = tk.Tk()
+        popup.title("Select Files")
+
+        # Create a Listbox to display the files with MULTIPLE selection mode
+        listbox = tk.Listbox(popup, selectmode=tk.MULTIPLE, width=50, height=10)
+        for file in file_list:
+            listbox.insert(tk.END, file)
+        listbox.pack(pady=10)
+
+        # Function to handle file selection
+        def confirm_selection():
+            # Get all selected files
+            indices = listbox.curselection()
+            selected_files = [file_list[i] for i in indices]
+
+            if selected_files:
+                messagebox.showinfo("Files Selected", f"You selected: {', '.join(selected_files)}")
+                popup.destroy()  # Close the popup after selection
+            else:
+                messagebox.showwarning("No Selection", "Please select at least one file.")
+
+        # Create a button to confirm the selection
+        select_button = tk.Button(popup, text="Select", command=confirm_selection)
+        select_button.pack(pady=5)
+
+        # Start the Tkinter event loop
+        popup.mainloop()
+
+        # Return the selected files
+        return [file_list[i] for i in listbox.curselection()]
 
     # Function to draw a circular light instead of square
     def _draw_circle(self, color):

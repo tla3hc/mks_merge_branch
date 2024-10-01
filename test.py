@@ -1,58 +1,60 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import messagebox
 
-def open_listbox_popup():
-    # Create a new Toplevel window (popup)
-    popup = tk.Toplevel(root)
-    popup.geometry("300x200")
-    popup.title("Select an Option")
+class FileSelector:
+    def __init__(self, master, file_list):
+        self.master = master
+        self.file_list = file_list
+        self.selected_files = []
+        
+        self.create_popup()
 
-    # Variable to store the selected value
-    selected_value = tk.StringVar()
+    def create_popup(self):
+        # Create a Toplevel window
+        self.popup = tk.Toplevel(self.master)
+        self.popup.title("Select Files")
 
-    # Create a Listbox widget
-    listbox = tk.Listbox(popup, height=5, selectmode=tk.SINGLE)
-    
-    # Add options to the Listbox
-    options = ["Option 1", "Option 2", "Option 3", "Option 4"]
-    for option in options:
-        listbox.insert(tk.END, option)
-    listbox.pack(pady=10)
+        # Create a Listbox to display the files with MULTIPLE selection mode
+        self.listbox = tk.Listbox(self.popup, selectmode=tk.MULTIPLE, width=50, height=10)
+        for file in self.file_list:
+            self.listbox.insert(tk.END, file)
+        self.listbox.pack(pady=10)
 
-    # Function to handle selection
-    def on_select():
-        selected_index = listbox.curselection()  # Get the selected index
-        if selected_index:
-            selected_value.set(listbox.get(selected_index))  # Store the selected value
-        popup.destroy()  # Close the popup
+        # Create a button to confirm the selection
+        self.select_button = tk.Button(self.popup, text="Select", command=self.select_files)
+        self.select_button.pack(pady=5)
 
-    # Add a button to confirm selection
-    select_button = ttk.Button(popup, text="Select", command=on_select)
-    select_button.pack(pady=10)
+    def select_files(self):
+        # Get all selected files
+        indices = self.listbox.curselection()
+        self.selected_files = [self.file_list[i] for i in indices]
 
-    # Wait until the popup window is closed
-    root.wait_window(popup)
+        if self.selected_files:
+            messagebox.showinfo("Files Selected", f"You selected: {', '.join(self.selected_files)}")
+            self.popup.destroy()  # Close the popup after selection
+        else:
+            messagebox.showwarning("No Selection", "Please select at least one file.")
 
-    # Return the selected value
-    return selected_value.get()
+# Main application
+def main():
+    root = tk.Tk()
+    root.title("Multiple File Selector Example")
 
-def show_popup_result():
-    # Open the popup and get the selected value
-    selected = open_listbox_popup()
-    if selected:
-        result_label.config(text=f"You selected: {selected}")
-    else:
-        result_label.config(text="No selection made")
+    # Example list of files
+    file_list = [
+        "file1.txt",
+        "file2.txt",
+        "file3.txt",
+        "file4.txt",
+        "file5.txt"
+    ]
 
-root = tk.Tk()
-root.geometry("400x300")
+    # Create a button to open the file selection popup
+    btn = tk.Button(root, text="Select Files", command=lambda: FileSelector(root, file_list))
+    btn.pack(pady=20)
 
-# Button to open the popup
-open_button = ttk.Button(root, text="Open Popup List", command=show_popup_result)
-open_button.pack(pady=50)
+    # Start the Tkinter event loop
+    root.mainloop()
 
-# Label to display the result
-result_label = ttk.Label(root, text="")
-result_label.pack(pady=10)
-
-root.mainloop()
+if __name__ == "__main__":
+    main()

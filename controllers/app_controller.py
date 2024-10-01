@@ -91,7 +91,7 @@ class AppController:
         project_name = project_name.strip()
         source_branch = source_branch.strip()
         target_branch = target_branch.strip()
-        status = self.model.merge_branches(project_name, source_branch, target_branch)
+        status = self.model.merge_branches(self.view, self.model, project_name, source_branch, target_branch)
 
         # Merge branches in the model
         if status:

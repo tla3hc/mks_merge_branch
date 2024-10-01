@@ -1,6 +1,7 @@
 from utils.mks_utils.mks import MKS
 import logging
 from utils.dev_brach_utils.merge_brach_utils import MergeBrach
+from tkinter import messagebox
 
 class AppModel:
     def __init__(self):
@@ -117,7 +118,7 @@ class AppModel:
     def get_status(self):
         return self.status
     
-    def merge_branches(self, project_name: str, source_branch: str, target_branch: str) -> bool:
+    def merge_branches(self, view, model, project_name: str, source_branch: str, target_branch: str) -> bool:
         if not project_name or not self.source_branch or not self.target_branch:
             self.status = "All inputs Required"
             logging.info("AppModel", self.status)
@@ -137,9 +138,23 @@ class AppModel:
             logging.error("AppModel", self.status)
             return False
         # Merge the source branch into the target branch
-        status, temp_folder = self.merge_branch.merge_branches(project_name, source_branch, target_branch)
-        logging.info("AppModel", f"Merge status: {status}")
-        logging.info("AppModel", f"Temp folder: {temp_folder}")
+        status, temp_folder = self.merge_branch.create_tmp_sandboxes(project_name, source_branch, target_branch)
+        if not status:
+            self.status = "Merge Failed"
+            return False
+        temp_source_folder = f"{temp_folder}/source"
+        temp_target_folder = f"{temp_folder}/target"
+        # Compare the source and target folders
+        differences = self.merge_branch.compare_folders(temp_target_folder, temp_source_folder)
+        # Popup a window to ask user to select all or manually select files
+        result = messagebox.askyesno("Confirmation", "Do you want to merge ALL?")
+        if result:
+            # Copy and replace all files from source to target
+            logging.info("AppModel", "Copying files")
+        else:
+            # Popup a window to ask user to select files manually
+            logging.info("AppModel", "Selecting files manually")
+            selected = view.select_files(differences)
         
         self.status = "Merge Complete"
         return True
