@@ -137,6 +137,7 @@ class AppModel:
             logging.error("AppModel", self.status)
             return False
         # Merge the source branch into the target branch
+        self.merge_branch.merge_branches(project_name, source_branch, target_branch)
         
         self.status = "Merge Complete"
         return True

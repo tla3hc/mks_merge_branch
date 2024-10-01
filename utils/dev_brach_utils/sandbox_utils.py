@@ -2,8 +2,9 @@ import os
 import logging
 import sys
 import shutil
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from mks_utils.mks import MKS
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# from mks_utils.mks import MKS
+from utils.mks_utils.mks import MKS
 
 
 class Sandbox:
