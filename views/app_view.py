@@ -92,35 +92,40 @@ class AppView:
         return selected_value.get()
     
     def select_files(self, file_list):
-        def on_select():
-            # Get the selected files
-            selected = [file_list[i] for i in listbox.curselection()]
-            selected_files.extend(selected)
-            root.quit()  # Close the window
+        # Create a new Toplevel window (popup)
+        popup = tk.Toplevel(self.root)
+        popup.geometry("600x300")
+        popup.title("Select Files")
 
-        selected_files = []
+        # Create a Listbox widget
+        listbox = tk.Listbox(popup, height=15, width=80, selectmode=MULTIPLE)
         
-        # Create the main window
-        root = tk.Tk()
-        root.title("Select Files")
-        
-        # Create a Listbox with multiple selection
-        listbox = Listbox(root, selectmode=MULTIPLE, height=10, width=50)
-        
-        # Add files to the Listbox
+        # Add options to the Listbox
         for file in file_list:
             listbox.insert(tk.END, file)
-        
-        listbox.pack(padx=10, pady=10)
+        listbox.pack(pady=10)
 
-        # Add a button to confirm the selection
-        button = Button(root, text="Select", command=on_select)
-        button.pack(pady=10)
+        # Variable to store the selected values
+        selected_files = []
+
+        # Function to handle the selection
+        def on_select():
+            selected_indices = listbox.curselection()  # Get the selected indices
+            for index in selected_indices:
+                selected_files.append(listbox.get(index))  # Store the selected values
+            popup.destroy()  # Close the popup
+
+        # Add a button to confirm selection
+        select_button = ttk.Button(popup, text="Select", command=on_select)
+        select_button.pack(pady=10)
         
-        root.mainloop()  # Wait for user action
+        # Wait until the popup window is closed
+        self.root.wait_window(popup)
         
+        # Return the selected values
         return selected_files
-
+    
+        
     # Function to draw a circular light instead of square
     def _draw_circle(self, color):
         self.status_light.create_oval(5, 5, 25, 25, fill=color, outline=color)
