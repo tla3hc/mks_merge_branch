@@ -4,8 +4,10 @@ import subprocess
 import re
 import os
 import logging
-from mks_utils.mks_exception import *
-from mks_utils.helper_class import Project
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from mks_exception import *
+from helper_class import Project
 
 
 class MKS:
@@ -152,6 +154,18 @@ class MKS:
                 subprojects.append(subproject)
         return subprojects
 
+    def extract_development_paths(self, mks_responses: str) -> list:
+        # Find the section after "Development Paths:" 
+        match = re.search(r'Development Paths:(.*?)(?=\n\S|$)', mks_responses, re.DOTALL)
+        
+        if match:
+            # Extract lines starting with a tab
+            paths_section = match.group(1)
+            dev_paths = re.findall(r'^\s+(.*?)(?=\s|$)', paths_section, re.MULTILINE)
+            return dev_paths
+        else:
+            return []
+
     def get_project_info(self, project_name: str, **kwargs) -> Project:
         """
             Retrieve detailed information of a given project.
@@ -186,7 +200,7 @@ class MKS:
             last_cp_date = re.search (r"Last Checkpoint Date:\s*(.*)", mks_responses).group(1).strip()
             members = re.search (r"Members:\s*(.*)", mks_responses).group(1).strip()
             subproject = re.search (r"Subprojects:\s*(.*)", mks_responses).group(1).strip()
-            dev_path = re.search (r"Development Paths:\s*(.*)", mks_responses).group(1).strip()
+            dev_path = self.extract_development_paths(mks_responses)
             return Project( project_name = project_name,
                             repo_location = repo_location,
                             server = server,
@@ -304,36 +318,16 @@ class MKS:
                     logging.warning('MKS', f"{sandbox_path} already exists")
                     
                 self.create_sandbox(project, sandbox_path, dev_path)
-                
-        # # Mainline
-        # for sub_module in sub_module_list:
-        #     project = mks_project.format(project_name, sub_module)
-        #     sandbox_path = f"{target_folder}/mainline/{sub_module}"
-        #     # Check if the sandbox folder exists
-        #     if not os.path.exists(sandbox_path):
-        #         logging.info('MKS', f"Creating sandbox at {sandbox_path}")
-        #         os.makedirs(sandbox_path)
-        #     else:
-        #         logging.warning('MKS', f"{sandbox_path} already exists")
-                
-        #     self.create_sandbox(project, sandbox_path, '')
-    
-    def check_project_exist(self, project_name) -> bool:
-        try:
-            print("hi")
-        except Exception as ex:
-            raise
-        
+
 
 if __name__ == "__main__":
-    import sys
-    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
-    from log.logger import Logger
-    logger = Logger()
+    # import sys
+    # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
+    # from log.logger import Logger
+    # logger = Logger()
     # mks = MKS(hostname="mks-ea-prod.in.audi.vwg", port = 7023, user="a0d9lk4", password="Rio@1094#300420") #b=1.14
     mks = MKS() 
     # b = mks.get_project_info("#/Powertrain_Functions_PreDev#PTDrvEng_LdCyc/01_PROD/04_TSI_PTDrvEng_LdCyc/10_FE_PTDrvEng_LdCyc/01_PROD/03_FMD/04_FMS#b=PTDrvEng_LdCyc_4.1.0")
     # b = mks.lock_member("C:/My Sandboxes/40_AutomationTool/HCP1_AutomationTool.zip")
     # b = mks.get_project_info(r"/Spielwiese/ITK_HCP1/00_Fortschrittsberichte/project.pj")
     # a = mks.run(r'si memberinfo "C:\My Sandboxes\20_Fahrbarkeit\PTDrvAxl_FilCord\07_SWMSWAT\04_SWMTS\PTDrvAxl_FilCord_TA.rml"')
-    a = mks.get_project_info()

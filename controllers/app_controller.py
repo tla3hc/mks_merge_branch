@@ -9,8 +9,8 @@ class AppController:
 
         # Set up button commands
         self.view.set_check_pj_button_command(self.check_project)
-        self.view.set_check_source_brach_button_command(self.check_project)
-        self.view.set_check_target_brach_button_command(self.check_project)
+        self.view.set_check_source_brach_button_command(self.check_source_branch)
+        self.view.set_check_target_brach_button_command(self.check_target_branch)
         self.view.set_merge_button_command(self.merge_branches)
 
     def check_project(self):
@@ -20,6 +20,28 @@ class AppController:
 
         # Check project in the model
         if self.model.check_project():
+            self.view.update_status(self.model.get_status(), "green")
+        else:
+            self.view.update_status(self.model.get_status(), "red")
+    
+    def check_source_branch(self):
+        # Get source branch from view
+        source_branch = self.view.get_source_branch()
+        status = self.model.set_source_branch(source_branch)
+
+        # Check project in the model
+        if status:
+            self.view.update_status(self.model.get_status(), "green")
+        else:
+            self.view.update_status(self.model.get_status(), "red")
+    
+    def check_target_branch(self):
+        # Get target branch from view
+        target_branch = self.view.get_target_branch()
+        status = self.model.set_target_branch(target_branch)
+
+        # Check project in the model
+        if status:
             self.view.update_status(self.model.get_status(), "green")
         else:
             self.view.update_status(self.model.get_status(), "red")
