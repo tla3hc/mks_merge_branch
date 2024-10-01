@@ -61,7 +61,7 @@ class AppView:
         popup.title("Select an branch")
 
         # Create a Listbox widget
-        listbox = tk.Listbox(popup, height=5, selectmode=tk.SINGLE)
+        listbox = tk.Listbox(popup, height=5, width=450, selectmode=tk.SINGLE)
         
         # Add options to the Listbox
         options = branches
@@ -115,3 +115,7 @@ class AppView:
 
     def get_target_branch(self):
         return self.target_input.get()
+    
+    def set_source_branch_input(self, branch):
+        self.source_input.delete(0, tk.END)
+        self.source_input.insert(0, branch)

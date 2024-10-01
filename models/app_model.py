@@ -92,7 +92,7 @@ class AppModel:
         self.status = "Valid Project"
         return True
 
-    def get_branches(self):
+    def get_dev_paths(self):
         if not self.project:
             # if the project name is set, get the project info
             if self.project_name:
@@ -104,7 +104,7 @@ class AppModel:
             else:
                 self.status = "Project Required, input and press 'Check'"
                 return []
-        return self.project.branches
+        return self.project.dev_paths
     
     def merge_branches(self):
         if not self.source_branch or not self.target_branch:

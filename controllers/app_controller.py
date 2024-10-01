@@ -49,10 +49,12 @@ class AppController:
     
     def select_source_branch(self):
         # Read all branches from mks and show them in a list
-        branches = self.model.get_branches()
+        branches = self.model.get_dev_paths()
         # Show the branches in a popup window
         source_branch = self.view.select_branch(branches)
         self.model.set_source_branch(source_branch)
+        # Fill the source branch input with the selected branch
+        self.view.set_source_branch_input(source_branch)
 
     def merge_branches(self):
         # Get source and target branches from view
