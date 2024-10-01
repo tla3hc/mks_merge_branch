@@ -18,6 +18,9 @@ class AppController:
     def check_project(self):
         # Get project name from view
         project_name = self.view.get_project_name()
+        if not project_name:
+            self.view.update_status("Project Required", "red")
+            return
         self.model.set_project_name(project_name)
 
         # Check project in the model

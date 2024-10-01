@@ -45,7 +45,8 @@ class AppModel:
                         logging.info("AppModel", self.status)
                         return True
                 except Exception as e:
-                    self.status = str(e)
+                    self.status = "Project Not Found or Invalid Branch"
+                    logging.error("AppModel", str(e))
                     return False
             else:
                 self.status = "Project Required"
@@ -80,7 +81,7 @@ class AppModel:
         try:
             self.project = self.mks.get_project_info(self.project_name)
         except Exception as e:
-            self.status = str(e)
+            self.status = "Project Not Found"
             logging.error("AppModel", str(e))
             return False
         self.status = "Valid Project"
@@ -93,13 +94,16 @@ class AppModel:
                 try:
                     self.get_project_info(self.project_name)
                 except Exception as e:
-                    self.status = str(e)
+                    self.status = "Project Not Found"
+                    logging.error("AppModel", str(e))
                     return []
             else:
                 self.status = "Project Required, input and press 'Check'"
+                logging.error("AppModel", self.status)
                 return []
         if len(self.project.dev_paths) == 0:
             self.status = "No branches found"
+            logging.error("AppModel", self.status)
             return []
         return self.project.dev_paths
 
@@ -124,6 +128,7 @@ class AppModel:
             self.status = "Invalid Source or Target Branch"
             logging.error("AppModel", self.status)
             return False
+        # Merge the source branch into the target branch
         
         self.status = "Merge Complete"
         return True
