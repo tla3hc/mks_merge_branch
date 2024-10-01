@@ -12,6 +12,7 @@ class AppController:
         self.view.set_check_source_brach_button_command(self.check_source_branch)
         self.view.set_select_source_branch_button_command(self.select_source_branch)
         self.view.set_check_target_branch_button_command(self.check_target_branch)
+        self.view.set_select_target_branch_button_command(self.select_target_branch)
         self.view.set_merge_button_command(self.merge_branches)
 
     def check_project(self):
@@ -58,6 +59,18 @@ class AppController:
         self.model.set_source_branch(source_branch)
         # Fill the source branch input with the selected branch
         self.view.set_source_branch_input(source_branch)
+    
+    def select_target_branch(self):
+        # Read all branches from mks and show them in a list
+        branches = self.model.get_dev_paths()
+        if len(branches) == 0:
+            self.view.update_status(self.model.get_status(), "red")
+            return
+        # Show the branches in a popup window
+        target_branch = self.view.select_branch(branches)
+        self.model.set_target_branch(target_branch)
+        # Fill the source branch input with the selected branch
+        self.view.set_target_branch_input(target_branch)
 
     def merge_branches(self):
         # Get source and target branches from view

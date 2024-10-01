@@ -32,16 +32,16 @@ class AppModel:
             return False
         # Check the source branch in MKS
         if self.project:
-            if branch in self.project.branches:
-                self.status = "Checked"
+            if branch in self.project.dev_paths:
+                self.status = "Valid Branch"
                 logging.info("AppModel", self.status)
                 return True
         else:
             if self.project_name:
                 try:
                     self.get_project_info(self.project_name)
-                    if branch in self.project.branches:
-                        self.status = "Checked"
+                    if branch in self.project.dev_paths:
+                        self.status = "Valid Branch"
                         logging.info("AppModel", self.status)
                         return True
                 except Exception as e:
