@@ -1,6 +1,6 @@
 from utils.mks_utils.mks import MKS
 import logging
-
+from utils.dev_brach_utils.merge_brach_utils import MergeBrach
 
 class AppModel:
     def __init__(self):
@@ -11,6 +11,7 @@ class AppModel:
         self.status = "Idle"
         self.mks = MKS()
         self.project = None
+        self.merge_branch = MergeBrach()
     
     def get_project_info(self, project_name):
         try:

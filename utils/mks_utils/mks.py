@@ -288,7 +288,29 @@ class MKS:
         # cd back to current directory
         os.chdir(current_dir)
         return mks_responses
-    
+
+    def drop_sandbox(self, sandbox_folder: str) -> str:
+        """_summary_
+        Drop a sandbox
+        Args:
+            sandbox_folder (str): _description_
+
+        Returns:
+            str: _description_
+        """
+        # get current directory
+        current_dir = os.getcwd()
+        # cd to sandbox_folderp
+        os.chdir(sandbox_folder)
+        cmd = f'si dropsandbox -f --delete=all "{sandbox_folder}"'
+        
+        mks_responses = self.run(cmd)
+        
+        # cd back to current directory
+        os.chdir(current_dir)
+        return mks_responses
+        
+        
     def create_sca_sandbox_batch_mode(self, project_name: str, target_folder: str, sub_module_list: list, dev_path_list: list) -> str:
         """
             Create a sandbox in batch mode
