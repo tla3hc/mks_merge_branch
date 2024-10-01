@@ -18,6 +18,8 @@ class AppController:
     def check_project(self):
         # Get project name from view
         project_name = self.view.get_project_name()
+        # Remove empty spaces from the project name
+        project_name = project_name.strip()
         if not project_name:
             self.view.update_status("Project Required", "red")
             return
@@ -32,6 +34,8 @@ class AppController:
     def check_source_branch(self):
         # Get source branch from view
         source_branch = self.view.get_source_branch()
+        # Remove empty spaces from the source branch
+        source_branch = source_branch.strip()
         status = self.model.set_source_branch(source_branch)
 
         # Check project in the model
@@ -43,6 +47,8 @@ class AppController:
     def check_target_branch(self):
         # Get target branch from view
         target_branch = self.view.get_target_branch()
+        # Remove empty spaces from the target branch
+        target_branch = target_branch.strip()
         status = self.model.set_target_branch(target_branch)
 
         # Check project in the model
@@ -81,6 +87,10 @@ class AppController:
         # Get source and target branches from view
         source_branch = self.view.get_source_branch()
         target_branch = self.view.get_target_branch()
+        # Remove empty spaces from the project name
+        project_name = project_name.strip()
+        source_branch = source_branch.strip()
+        target_branch = target_branch.strip()
         status = self.model.merge_branches(project_name, source_branch, target_branch)
 
         # Merge branches in the model
