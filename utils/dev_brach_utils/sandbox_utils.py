@@ -33,7 +33,6 @@ class Sandbox:
                 project += "/project.pj"
             # Create sandbox
             if "mainline" in dev_path.lower():
-                project = f"{project}#n="
                 response = self.mks.create_sandbox(project, sandbox_folder, "")
             else:
                 response = self.mks.create_sandbox(project, sandbox_folder, dev_path)

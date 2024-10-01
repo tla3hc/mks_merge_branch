@@ -137,7 +137,9 @@ class AppModel:
             logging.error("AppModel", self.status)
             return False
         # Merge the source branch into the target branch
-        self.merge_branch.merge_branches(project_name, source_branch, target_branch)
+        status, temp_folder = self.merge_branch.merge_branches(project_name, source_branch, target_branch)
+        logging.info("AppModel", f"Merge status: {status}")
+        logging.info("AppModel", f"Temp folder: {temp_folder}")
         
         self.status = "Merge Complete"
         return True
