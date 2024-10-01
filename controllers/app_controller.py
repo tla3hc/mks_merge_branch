@@ -73,13 +73,15 @@ class AppController:
         self.view.set_target_branch_input(target_branch)
 
     def merge_branches(self):
+        # Get project name from view
+        project_name = self.view.get_project_name()
         # Get source and target branches from view
         source_branch = self.view.get_source_branch()
         target_branch = self.view.get_target_branch()
-        self.model.set_branches(source_branch, target_branch)
+        status = self.model.merge_branches(project_name, source_branch, target_branch)
 
         # Merge branches in the model
-        if self.model.merge_branches():
+        if status:
             self.view.update_status(self.model.get_status(), "green")
         else:
             self.view.update_status(self.model.get_status(), "red")

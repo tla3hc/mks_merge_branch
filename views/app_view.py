@@ -69,7 +69,9 @@ class AppView:
             listbox.insert(tk.END, option)
         listbox.pack(pady=10)
 
-        selected_value = None
+        # Variable to store the selected value
+        selected_value = tk.StringVar()
+        
         # Function to handle the selection
         def on_select():
             selected_index = listbox.curselection()  # Get the selected index

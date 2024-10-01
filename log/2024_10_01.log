@@ -158,3 +158,13 @@
 2024-10-01 14:54:51: [31m             MKS               : [WinError 2] The system cannot find the file specified[0m
 2024-10-01 14:54:51:              MKS               : None[0m
 2024-10-01 14:54:51:         AppController          : Init[0m
+2024-10-01 15:08:09:             Logger             : Init[0m
+2024-10-01 15:08:09:            AppModel            : Init[0m
+2024-10-01 15:08:09:              MKS               : Checking current connection[0m
+2024-10-01 15:08:09:              MKS               : Current connection status:[0m
+2024-10-01 15:08:09: [31m             MKS               : [WinError 2] The system cannot find the file specified[0m
+2024-10-01 15:08:09:              MKS               : None[0m
+2024-10-01 15:08:09:         AppController          : Init[0m
+2024-10-01 15:08:15: [31m           AppModel            : [WinError 2] The system cannot find the file specified[0m
+2024-10-01 15:08:16: [31m           AppModel            : [WinError 2] The system cannot find the file specified[0m
+2024-10-01 15:08:16: [31m           AppModel            : [WinError 2] The system cannot find the file specified[0m

@@ -54,20 +54,13 @@ class AppModel:
         self.status = "Branch Not Found"
         logging.error("AppModel", self.status)
         return False
-
-    def set_branches(self, source: str, target: str) -> bool:
-        # Check if the source and target branches are valid
-        if not self.check_branch(source) or not self.check_branch(target):
-            return False
-        self.source_branch = source
-        self.target_branch = target
-        return True
     
     def set_source_branch(self, source: str) -> bool:
         # Check if the source branch is valid
         if not self.check_branch(source):
             return False
         self.source_branch = source
+        self.status = "Valid Source Branch"
         return True
 
     def set_target_branch(self, target: str) -> bool:
@@ -75,6 +68,7 @@ class AppModel:
         if not self.check_branch(target):
             return False
         self.target_branch = target
+        self.status = "Valid Target Branch"
         return True
         
     def check_project(self):
@@ -108,13 +102,28 @@ class AppModel:
             self.status = "No branches found"
             return []
         return self.project.dev_paths
-    
-    def merge_branches(self):
-        if not self.source_branch or not self.target_branch:
-            self.status = "Branches Required"
-            return False
-        self.status = "Merge Complete"
-        return True
 
     def get_status(self):
         return self.status
+    
+    def merge_branches(self, project_name: str, source_branch: str, target_branch: str) -> bool:
+        if not project_name or not self.source_branch or not self.target_branch:
+            self.status = "All inputs Required"
+            logging.info("AppModel", self.status)
+            return False
+        # Check if the project name is different from the current project name
+        if project_name != self.project_name:
+            # Get the project info
+            try:
+                self.get_project_info(project_name)
+            except Exception as e:
+                self.status = str(e)
+                return False
+        # Check if the source and target branches are valid
+        if not self.set_source_branch(source_branch) or not self.set_target_branch(target_branch):
+            self.status = "Invalid Source or Target Branch"
+            logging.error("AppModel", self.status)
+            return False
+        
+        self.status = "Merge Complete"
+        return True
