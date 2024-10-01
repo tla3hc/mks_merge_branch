@@ -74,13 +74,18 @@ class AppView:
         def on_select():
             selected_index = listbox.curselection()  # Get the selected index
             if selected_index:
-                selected_value = listbox.get(selected_index)
-                popup.destroy()  # Close the popup window
+                selected_value.set(listbox.get(selected_index))  # Store the selected value
+            popup.destroy()  # Close the popup
 
         # Add a button to confirm selection
         select_button = ttk.Button(popup, text="Select", command=on_select)
         select_button.pack(pady=10)
-        return selected_value
+        
+        # Wait until the popup window is closed
+        self.root.wait_window(popup)
+        
+        # Return the selected value
+        return selected_value.get()
 
     # Function to draw a circular light instead of square
     def _draw_circle(self, color):
@@ -98,10 +103,10 @@ class AppView:
     def set_check_source_brach_button_command(self, command):
         self.check_source_branch_button.config(command=command)
     
-    def set_select_source_brach_button_command(self, command):
+    def set_select_source_branch_button_command(self, command):
         self.select_source_branch_button.config(command=command)
         
-    def set_check_target_brach_button_command(self, command):
+    def set_check_target_branch_button_command(self, command):
         self.check_target_branch_button.config(command=command)
 
     def set_merge_button_command(self, command):

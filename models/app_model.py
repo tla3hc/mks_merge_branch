@@ -104,6 +104,9 @@ class AppModel:
             else:
                 self.status = "Project Required, input and press 'Check'"
                 return []
+        if len(self.project.dev_paths) == 0:
+            self.status = "No branches found"
+            return []
         return self.project.dev_paths
     
     def merge_branches(self):
