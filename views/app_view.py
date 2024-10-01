@@ -57,11 +57,11 @@ class AppView:
     def select_branch(self, branches):
         # Create a new Toplevel window (popup)
         popup = tk.Toplevel(self.root)
-        popup.geometry("200x150")
+        popup.geometry("600x150")
         popup.title("Select an branch")
 
         # Create a Listbox widget
-        listbox = tk.Listbox(popup, height=100, width=600, selectmode=tk.SINGLE)
+        listbox = tk.Listbox(popup, height=5, width=600, selectmode=tk.SINGLE)
         
         # Add options to the Listbox
         options = branches
