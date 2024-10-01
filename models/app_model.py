@@ -156,6 +156,9 @@ class AppModel:
             logging.info("AppModel", "Selecting files manually")
             selected = view.select_files(differences)
             logging.info("AppModel", selected)
+            # Make sandbox writable
+            self.mks.make_sandbox_writable(temp_source_folder)
+            self.mks.make_sandbox_writable(temp_target_folder)
             # Copy selected files from source to target
             self.merge_branch.merge_folder(temp_source_folder, temp_target_folder, selected)
         self.status = "Merge Complete"
