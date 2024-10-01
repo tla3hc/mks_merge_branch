@@ -1,8 +1,10 @@
 from utils.mks_utils.mks import MKS
+import logging
 
 
 class AppModel:
     def __init__(self):
+        logging.info('AppModel', 'Init')
         self.project_name = ""
         self.source_branch = ""
         self.target_branch = ""
@@ -14,6 +16,7 @@ class AppModel:
         try:
             self.project = self.mks.get_project_info(project_name)
         except Exception as e:
+            logging.error("AppModel", str(e))
             raise
 
     def set_project_name(self, project_name):
@@ -25,11 +28,13 @@ class AppModel:
     def check_branch(self, branch: str) -> bool:
         if not branch:
             self.status = "Branch(es) Required"
+            logging.error("AppModel", self.status)
             return False
         # Check the source branch in MKS
         if self.project:
             if branch in self.project.branches:
                 self.status = "Checked"
+                logging.info("AppModel", self.status)
                 return True
         else:
             if self.project_name:
@@ -37,14 +42,17 @@ class AppModel:
                     self.get_project_info(self.project_name)
                     if branch in self.project.branches:
                         self.status = "Checked"
+                        logging.info("AppModel", self.status)
                         return True
                 except Exception as e:
                     self.status = str(e)
                     return False
             else:
                 self.status = "Project Required"
+                logging.error("AppModel", self.status)
                 return False
         self.status = "Branch Not Found"
+        logging.error("AppModel", self.status)
         return False
 
     def set_branches(self, source: str, target: str) -> bool:
@@ -72,12 +80,14 @@ class AppModel:
     def check_project(self):
         if not self.project_name:
             self.status = "Project Required"
+            logging.error("AppModel", self.status)
             return False
         # Check the project in MKS
         try:
             self.project = self.mks.get_project_info(self.project_name)
         except Exception as e:
             self.status = str(e)
+            logging.error("AppModel", str(e))
             return False
         self.status = "Checked"
         return True

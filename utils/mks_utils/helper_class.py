@@ -1,5 +1,5 @@
 class Project:
-    def __init__(self, project_name, repo_location, server, config_path, is_restricted, last_cp, last_cp_date, members, subproject):
+    def __init__(self, project_name, repo_location, server, config_path, is_restricted, last_cp, last_cp_date, members, subproject, dev_paths):
         self.shortname = project_name.strip("/project.pj").split(r"/")[-1]
         self.project_name = project_name
         self.repo_location = repo_location
@@ -10,6 +10,7 @@ class Project:
         self.last_cp_date = last_cp_date
         self.members = members
         self.subproject = subproject
+        self.dev_paths = dev_paths
 
     def __str__(self):
         return f"{self.shortname}"

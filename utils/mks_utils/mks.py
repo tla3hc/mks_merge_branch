@@ -200,7 +200,7 @@ class MKS:
             last_cp_date = re.search (r"Last Checkpoint Date:\s*(.*)", mks_responses).group(1).strip()
             members = re.search (r"Members:\s*(.*)", mks_responses).group(1).strip()
             subproject = re.search (r"Subprojects:\s*(.*)", mks_responses).group(1).strip()
-            dev_path = self.extract_development_paths(mks_responses)
+            dev_paths = self.extract_development_paths(mks_responses)
             return Project( project_name = project_name,
                             repo_location = repo_location,
                             server = server,
@@ -210,7 +210,7 @@ class MKS:
                             last_cp_date = last_cp_date,
                             members = members,
                             subproject = subproject,
-                            dev_path = dev_path)
+                            dev_paths = dev_paths)
         else:
             raise  ProjectNotFoundError(errors=mks_responses)
 
