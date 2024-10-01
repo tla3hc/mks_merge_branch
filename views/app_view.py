@@ -18,7 +18,7 @@ class AppView:
         self.check_pj_button.grid(row=0, column=3, padx=10, pady=10)
 
         # 2nd row: Source branch label, input, and Target branch label, input
-        self.source_label = ttk.Label(root, text="Source branch:")
+        self.source_label = ttk.Label(root, text="Source DP:")
         self.source_label.grid(row=1, column=0, padx=10, pady=10)
         
         self.source_input = ttk.Entry(root, width=50)  # Increased input field width
@@ -31,7 +31,7 @@ class AppView:
         self.check_source_branch_button.grid(row=1, column=3, padx=10, pady=10)
 
         # 3rd row:
-        self.target_label = ttk.Label(root, text="Target branch:")
+        self.target_label = ttk.Label(root, text="Target DP:")
         self.target_label.grid(row=2, column=0, padx=10, pady=10, sticky='e')
 
         self.target_input = ttk.Entry(root, width=50)  # Increased width of input

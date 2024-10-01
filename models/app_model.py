@@ -15,11 +15,17 @@ class AppModel:
     def get_project_info(self, project_name):
         try:
             self.project = self.mks.get_project_info(project_name)
+            # add "Mainline" to the list of dev paths
+            if self.project:
+                self.project.dev_paths.append("Mainline")
         except Exception as e:
             logging.error("AppModel", str(e))
             raise
 
     def set_project_name(self, project_name):
+        # Check if project name end with / or \ and remove it
+        if project_name.endswith("/") or project_name.endswith("\\"):
+            project_name = project_name[:-1]
         # Check if the project name contain /project.pj at the end, if not add it
         if not project_name.endswith("/project.pj"):
             project_name += "/project.pj"
@@ -121,7 +127,8 @@ class AppModel:
             try:
                 self.get_project_info(project_name)
             except Exception as e:
-                self.status = str(e)
+                self.status = "Project Not Found"
+                logging.error("AppModel", str(e))
                 return False
         # Check if the source and target branches are valid
         if not self.set_source_branch(source_branch) or not self.set_target_branch(target_branch):
