@@ -155,6 +155,8 @@ class AppModel:
             # Popup a window to ask user to select files manually
             logging.info("AppModel", "Selecting files manually")
             selected = view.select_files(differences)
-        
+            logging.info("AppModel", selected)
+            # Copy selected files from source to target
+            self.merge_branch.merge_folder(temp_source_folder, temp_target_folder, selected)
         self.status = "Merge Complete"
         return True

@@ -151,3 +151,4 @@ class MergeBrach:
                 os.remove(target_file)
             # Copy file using shutil.copy
             shutil.copy(file, target_file)
+            logging.info("MergeBrach", f"File {file} copied to {target_file}")
