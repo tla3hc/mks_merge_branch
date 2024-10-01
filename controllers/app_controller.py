@@ -10,6 +10,7 @@ class AppController:
         # Set up button commands
         self.view.set_check_pj_button_command(self.check_project)
         self.view.set_check_source_brach_button_command(self.check_source_branch)
+        self.view.set_select_source_brach_button_command(self.select_source_branch)
         self.view.set_check_target_brach_button_command(self.check_target_branch)
         self.view.set_merge_button_command(self.merge_branches)
 
@@ -45,6 +46,13 @@ class AppController:
             self.view.update_status(self.model.get_status(), "green")
         else:
             self.view.update_status(self.model.get_status(), "red")
+    
+    def select_source_branch(self):
+        # Read all branches from mks and show them in a list
+        branches = self.model.get_branches()
+        # Show the branches in a popup window
+        source_branch = self.view.select_branch(branches)
+        self.model.set_source_branch(source_branch)
 
     def merge_branches(self):
         # Get source and target branches from view

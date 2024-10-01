@@ -89,9 +89,23 @@ class AppModel:
             self.status = str(e)
             logging.error("AppModel", str(e))
             return False
-        self.status = "Checked"
+        self.status = "Valid Project"
         return True
 
+    def get_branches(self):
+        if not self.project:
+            # if the project name is set, get the project info
+            if self.project_name:
+                try:
+                    self.get_project_info(self.project_name)
+                except Exception as e:
+                    self.status = str(e)
+                    return []
+            else:
+                self.status = "Project Required, input and press 'Check'"
+                return []
+        return self.project.branches
+    
     def merge_branches(self):
         if not self.source_branch or not self.target_branch:
             self.status = "Branches Required"
