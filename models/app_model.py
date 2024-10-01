@@ -85,7 +85,7 @@ class AppModel:
             return False
         # Check the project in MKS
         try:
-            self.project = self.mks.get_project_info(self.project_name)
+            self.get_project_info(self.project_name)
         except Exception as e:
             self.status = "Project Not Found"
             logging.error("AppModel", str(e))
