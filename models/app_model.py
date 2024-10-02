@@ -119,6 +119,32 @@ class AppModel:
         return self.status
     
     def merge_branches(self, view, model, project_name: str, source_branch: str, target_branch: str) -> bool:
+        """
+        Merges the source branch into the target branch for a given project.
+        Args:
+            view: The view object to update the status and interact with the user.
+            model: The model object to interact with the project data.
+            project_name (str): The name of the project.
+            source_branch (str): The name of the source branch to merge from.
+            target_branch (str): The name of the target branch to merge into.
+        Returns:
+            bool: True if the merge is successful, False otherwise.
+        Raises:
+            Exception: If there is an error while getting project info or during the merge process.
+        Steps:
+            1. Update the status to "Merging...".
+            2. Validate the inputs.
+            3. Normalize the project name.
+            4. Check if the project name is different from the current project name and update project info if needed.
+            5. Validate the source and target branches.
+            6. Create temporary sandboxes for the merge.
+            7. Compare the source and target folders.
+            8. Ask the user to confirm if they want to merge all files or select files manually.
+            9. Copy and replace files based on user selection.
+            10. Make sandboxes writable if needed.
+            11. Drop the temporary sandboxes.
+            12. Update the status to "Merge Complete".
+        """
         view.update_status("Merging...", "yellow")
         if not project_name or not self.source_branch or not self.target_branch:
             self.status = "All inputs Required"
@@ -185,6 +211,8 @@ class AppModel:
             # Release locks
             # Drop sandboxes
             view.update_status("Dropping Sandboxes...", "yellow")
+            logging.info("AppModel", "Dropping Sandboxes")
+            response = self.mks.drop_sandbox(temp_source_folder)
             
         self.status = "Merge Complete"
         return True

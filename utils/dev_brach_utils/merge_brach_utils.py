@@ -172,8 +172,9 @@ class MergeBrach:
                     # Delete file using os.remove
                     os.remove(target_file)
                 # Copy file using shutil.copy
-                shutil.copy(source_file, target_file)
-                logging.info("MergeBrach", f"File {source_file} copied to {target_file}")
+                if os.path.exists(source_file):
+                    shutil.copy(source_file, target_file)
+                    logging.info("MergeBrach", f"File {source_file} copied to {target_file}")
             return True
         except Exception as e:
             logging.error("MergeBrach", str(e))
