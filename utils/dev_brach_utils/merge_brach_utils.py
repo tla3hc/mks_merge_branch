@@ -191,14 +191,18 @@ class MergeBrach:
         Returns:
             bool: _description_
         """
-        for file in files:
-            file = os.path.abspath(file)
-            # Lock file
-            response, lock_version = self.mks.lock_member(file)
-            if "error has occurred" in response.lower():
-                logging.error("MergeBrach", response)
-                return False
-        return True
+        try:
+            for file in files:
+                file = os.path.abspath(file)
+                # Lock file
+                response, lock_version = self.mks.lock_member(file)
+                if "error has occurred" in response.lower():
+                    logging.error("MergeBrach", response)
+                    return False
+            return True
+        except Exception as e:
+            logging.error("MergeBrach", str(e))
+            return False
     
     def remove_lock_files(self, files: list) -> bool:
         """_summary_
@@ -209,11 +213,15 @@ class MergeBrach:
         Returns:
             bool: _description_
         """
-        for file in files:
-            file = os.path.abspath(file)
-            # Remove lock from file
-            response = self.mks.unlock_member(file)
-            if "error has occurred" in response.lower():
-                logging.error("MergeBrach", response)
-                return False
-        return True
+        try:
+            for file in files:
+                file = os.path.abspath(file)
+                # Remove lock from file
+                response = self.mks.unlock_member(file)
+                if "error has occurred" in response.lower():
+                    logging.error("MergeBrach", response)
+                    return False
+            return True
+        except Exception as e:
+            logging.error("MergeBrach", str(e))
+            return False

@@ -250,7 +250,7 @@ class MKS:
         Returns:
             str: The locked revision version if found, otherwise None.
         """
-        cmd = f'si unlock --action=remove -forceConfirm=yes "{member}"'
+        cmd = f'si unlock --action=remove --forceConfirm=yes "{member}"'
         mks_responses = self.run(cmd)
         return mks_responses
 

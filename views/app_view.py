@@ -94,7 +94,7 @@ class AppView:
     def select_files(self, file_list):
         # Create a new Toplevel window (popup)
         popup = tk.Toplevel(self.root)
-        popup.geometry("600x300")
+        popup.geometry("600x320")
         popup.title("Select Files")
  
         # Create a Listbox widget
