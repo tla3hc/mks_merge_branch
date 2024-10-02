@@ -341,7 +341,7 @@ class MKS:
             sandbox_folder = sandbox_folder[:-1]
         
         sandbox_folder = f"{sandbox_folder}/project.pj"
-        cmd = f'si dropsandbox -f --delete=all "{sandbox_folder}"'
+        cmd = f'si dropsandbox -f --delete=all --forceConfirm=yes "{sandbox_folder}"'
         
         mks_responses = self.run(cmd)
         
