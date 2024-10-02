@@ -213,6 +213,10 @@ class AppModel:
             view.update_status("Dropping Sandboxes...", "yellow")
             logging.info("AppModel", "Dropping Sandboxes")
             response = self.mks.drop_sandbox(temp_source_folder)
+            logging.info("AppModel", f"Drop source sandbox: {response}")
+            response = self.mks.drop_sandbox(temp_target_folder)
+            logging.info("AppModel", f"Drop target sandbox: {response}")
+            
             
         self.status = "Merge Complete"
         return True
