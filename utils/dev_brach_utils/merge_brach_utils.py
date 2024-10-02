@@ -1,8 +1,6 @@
 import os
 import logging
-import sys
 from utils.dev_brach_utils.sandbox_utils import Sandbox
-import time
 from typing import Tuple
 import filecmp
 from tkinter import messagebox
@@ -73,6 +71,26 @@ class MergeBrach:
             raise
     
     def create_tmp_sandboxes(self, project: str, source_branch: str, target_branch: str) -> Tuple[bool, str]:
+        """
+        Creates temporary sandboxes for the given project and branches.
+
+        Args:
+            project (str): The name of the project.
+            source_branch (str): The name of the source branch.
+            target_branch (str): The name of the target branch.
+
+        Returns:
+            Tuple[bool, str]: A tuple containing a boolean indicating success or failure, 
+                              and a string with the path to the current temporary folder.
+
+        Raises:
+            Exception: If an error occurs during the creation of the sandboxes.
+
+        Notes:
+            - Logs an error if any of the required arguments are missing.
+            - Creates a unique temporary folder for the sandboxes based on the current count of folders in the temp directory.
+            - Creates separate sandboxes for the source and target branches.
+        """
         try:
             # Check if all arguments are provided
             if not project or not source_branch or not target_branch:
@@ -137,18 +155,26 @@ class MergeBrach:
         Returns:
             bool: _description_
         """
+        # ./.tmp/0/source
+        # ./.tmp/0/target
         # Check if source and target folder is exist
         if not os.path.exists(source_folder) or not os.path.exists(target_folder):
             logging.error("MergeBrach", "Source or Target folder is not exist")
             return False
-        # Copy and replace all files from source to target
-        for file in diffent:
-            file_name = file.replace(source_folder, "")
-            target_file = f"{target_folder}{file_name}"
-            # Check if file is exist in target folder
-            if os.path.exists(target_file):
-                # Delete file using os.remove
-                os.remove(target_file)
-            # Copy file using shutil.copy
-            shutil.copy(file, target_file)
-            logging.info("MergeBrach", f"File {file} copied to {target_file}")
+        try:
+            # Copy and replace all files from source to target
+            for file in diffent:
+                file = os.path.abspath(file)
+                source_file = file
+                target_file = file.replace('/source/', '/target/')  # Replace source with target
+                # Check if file is exist in target folder 
+                if os.path.exists(target_file):
+                    # Delete file using os.remove
+                    os.remove(target_file)
+                # Copy file using shutil.copy
+                shutil.copy(source_file, target_file)
+                logging.info("MergeBrach", f"File {source_file} copied to {target_file}")
+            return True
+        except Exception as e:
+            logging.error("MergeBrach", str(e))
+            return False

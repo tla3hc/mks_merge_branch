@@ -1,5 +1,3 @@
-# VERSIOM: 0.0.1
-
 import subprocess
 import re
 import os
@@ -290,6 +288,15 @@ class MKS:
         return mks_responses
     
     def make_sandbox_writable(self, sandbox_folder: str) -> str:
+        """
+        Makes the specified sandbox folder writable by executing the appropriate command.
+        Args:
+            sandbox_folder (str): The path to the sandbox folder that needs to be made writable.
+        Returns:
+            str: The response from the command execution.
+        Raises:
+            ValueError: If the specified sandbox folder does not exist.
+        """
         # Validate sandbox folder
         if not os.path.exists(sandbox_folder):
             raise (f"Sandbox folder {sandbox_folder} does not exist")
