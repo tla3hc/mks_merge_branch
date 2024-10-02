@@ -124,6 +124,12 @@ class AppModel:
             self.status = "All inputs Required"
             logging.info("AppModel", self.status)
             return False
+        # Check if project name is end with / or \ and remove it
+        if project_name.endswith("/") or project_name.endswith("\\"):
+            project_name = project_name[:-1]
+        # Check if project name is end with /project.pj and add it if not
+        if not project_name.endswith("/project.pj"):
+            project_name += "/project.pj"
         # Check if the project name is different from the current project name
         if project_name != self.project_name:
             # Get the project info
@@ -164,11 +170,16 @@ class AppModel:
             logging.info("AppModel", selected)
             # Make sandbox writable
             view.update_status("Making Sandboxes Writable...", "yellow")
-            self.mks.make_sandbox_writable(temp_source_folder)
-            self.mks.make_sandbox_writable(temp_target_folder)
+            logging.info("AppModel", "Making Sandboxes Writable")
+            response = self.mks.make_sandbox_writable(temp_source_folder)
+            logging.info("AppModel", response)
+            response = self.mks.make_sandbox_writable(temp_target_folder)
+            logging.info("AppModel", response)
             # Copy selected files from source to target
             view.update_status("Copying Selected Files...", "yellow")
-            self.merge_branch.merge_folder(temp_source_folder, temp_target_folder, selected)
+            logging.info("AppModel", "Copying Selected Files")
+            status = self.merge_branch.merge_folder(temp_source_folder, temp_target_folder, selected)
+            logging.info("AppModel", f"Merge status: {status}")
             # Lock files
             # Checkin files
             # Release locks
