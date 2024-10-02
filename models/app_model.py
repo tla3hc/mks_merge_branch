@@ -225,7 +225,8 @@ class AppModel:
             # Checkin files
             logging.info("AppModel", "Checkin Files")
             view.update_status("Checkin Files...", "yellow")
-            status, success_list = self.merge_branch.checkin_members(copied_files)
+            discprition = "Merged files from branch " + source_branch + " to " + target_branch
+            status, success_list = self.merge_branch.checkin_members(copied_files, discprition)
             if not status:
                 self.status = "Merge Failed"
                 logging.error("AppModel", f"Checkin files failed: {status}")
