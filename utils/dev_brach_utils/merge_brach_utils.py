@@ -225,3 +225,30 @@ class MergeBrach:
         except Exception as e:
             logging.error("MergeBrach", str(e))
             return False
+        
+    def checkin_members(self, member_path_list: list, description: str) -> tuple:
+        """
+        Checks in a list of members to the repository.
+
+        Args:
+            member_path_list (list): A list of file paths to the members to be checked in.
+            description (str): A description for the check-in operation.
+
+        Returns:
+            bool: True if all members are successfully checked in, False if any error occurs.
+
+        Logs:
+            Errors if a member does not exist or if an error occurs during the check-in process.
+        """
+        success_list = []
+        for member in member_path_list:
+            member_path = os.path.abspath(member)
+            if not os.path.exists(member_path):
+                logging.error("MergeBrach", f"Member {member_path} does not exist")
+                continue
+            response = self.mks.checkin_member(member_path, description)
+            if "error has occurred" in response.lower():
+                logging.error("MergeBrach", f"Error occurred while checking in member {member_path}")
+                return False
+            success_list.append(member_path)
+        return True, success_list

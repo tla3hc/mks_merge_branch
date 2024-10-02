@@ -125,6 +125,34 @@ class AppView:
         # Return the selected values
         return selected_files
     
+    def show_success_files(self, file_list: list) -> bool:
+        # Create a new Toplevel window (popup)
+        popup = tk.Toplevel(self.root)
+        popup.geometry("600x320")
+        popup.title("Merge Success Files")
+ 
+        # Create a Listbox widget
+        listbox = tk.Listbox(popup, height=15, width=80, selectmode=MULTIPLE)
+       
+        # Add options to the Listbox
+        for file in file_list:
+            listbox.insert(tk.END, file)
+        listbox.pack(pady=10)
+        
+        # Function to handle the selection
+        def on_select():
+            popup.destroy()  # Close the popup
+ 
+        # Add a button to confirm selection
+        select_button = ttk.Button(popup, text="OK", command=on_select)
+        select_button.pack(pady=10)
+       
+        # Wait until the popup window is closed
+        self.root.wait_window(popup)
+       
+        # Return the selected values
+        return True
+    
         
     # Function to draw a circular light instead of square
     def _draw_circle(self, color):

@@ -223,6 +223,12 @@ class AppModel:
                 logging.error("AppModel", f"Lock files failed: {status}")
                 return False
             # Checkin files
+            logging.info("AppModel", "Checkin Files")
+            view.update_status("Checkin Files...", "yellow")
+            status, success_list = self.merge_branch.checkin_members(copied_files)
+            if not status:
+                self.status = "Merge Failed"
+                logging.error("AppModel", f"Checkin files failed: {status}")
             # Release locks
             view.update_status("Releasing Locks...", "yellow")
             logging.info("AppModel", "Releasing Locks")
@@ -230,7 +236,6 @@ class AppModel:
             if not status:
                 self.status = "Merge Failed"
                 logging.error("AppModel", f"Release locks failed: {status}")
-                return False
             # Drop sandboxes
             view.update_status("Dropping Sandboxes...", "yellow")
             logging.info("AppModel", "Dropping Sandboxes")
@@ -238,6 +243,10 @@ class AppModel:
             logging.info("AppModel", f"Drop source sandbox: {response}")
             response = self.mks.drop_sandbox(temp_target_folder)
             logging.info("AppModel", f"Drop target sandbox: {response}")
+            
+            #Popup a window showing the files that are successfully merged
+            view.show_message("Success")
+            view.show_success_files(success_list)
             
         self.status = "Merge Complete"
         return True

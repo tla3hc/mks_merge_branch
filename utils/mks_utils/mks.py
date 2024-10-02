@@ -368,37 +368,20 @@ class MKS:
         return mks_responses
         
         
-    def create_sca_sandbox_batch_mode(self, project_name: str, target_folder: str, sub_module_list: list, dev_path_list: list) -> str:
+    def checkin_member(self, member_path, description):
         """
-            Create a sandbox in batch mode
-            
-            DEFAULT CLI:    si createsandbox --project="{project}" --sandbox="{sandbox}"
-            Parameters:
-                project: path of the project that you want to create sandbox
-                sandbox: path of the sandbox that you want to create
+        Checks in members to the repository with the specified description.
 
-            Returns:
-                CLI response
+        Args:
+            member_path (str): The path to the member to be checked in.
+            description (str): The description for the check-in.
 
-            Example: mks.create_sandbox("C:/My Sandboxes/path/to/project.pj", "C:/My Sandboxes/path/to/sandbox")
-
-            Reference: https://mks-ea-prod.in.audi.vwg:7021/r12.4.0.0/en/index.html#page/IntegrityHelp%2Fsi_createsandbox.html%23
+        Returns:
+            list: The responses from the MKS command execution.
         """
-        mks_project ='/SWC_{}/01_PROD/30_CG/{}/30_T/40_SCA/project.pj'
-        for dev_path in dev_path_list:
-            for sub_module in sub_module_list:
-                project = mks_project.format(project_name, sub_module)
-                sandbox_path = f"{target_folder}/{project_name}/{dev_path}/{sub_module}"
-                # Check if the sandbox folder exists
-                if not os.path.exists(sandbox_path):
-                    logging.info('MKS', f"Creating sandbox at {sandbox_path}")
-                    os.makedirs(sandbox_path)
-                else:
-                    logging.warning('MKS', f"{sandbox_path} already exists")
-                    
-                self.create_sandbox(project, sandbox_path, dev_path)
-
-
+        cmd = f'si ci --branchVariant --checkinUnchanged --cpid=:none --description="{description}" {member_path}'
+        mks_responses = self.run(cmd)
+        return mks_responses
 if __name__ == "__main__":
     # import sys
     # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
