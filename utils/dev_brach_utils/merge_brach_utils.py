@@ -5,6 +5,7 @@ from typing import Tuple
 import filecmp
 from tkinter import messagebox
 import shutil
+from utils.mks_utils.mks import MKS
 
 class MergeBrach:
     _m_temp_folder = "./.tmp"
@@ -13,6 +14,7 @@ class MergeBrach:
     def __init__(self):
         logging.info('MergeBrach', 'Init')
         self.sandbox = Sandbox()
+        self.mks = MKS()
         # Check if temp folder is exist, if not create it
         if not os.path.exists(self._m_temp_folder):
             os.makedirs(self._m_temp_folder)
@@ -179,3 +181,39 @@ class MergeBrach:
         except Exception as e:
             logging.error("MergeBrach", str(e))
             return False
+    
+    def lock_files(self, files: list) -> bool:
+        """_summary_
+        Lock files in the given list.
+        Args:
+            files (list): _description_
+
+        Returns:
+            bool: _description_
+        """
+        for file in files:
+            file = os.path.abspath(file)
+            # Lock file
+            response, lock_version = self.mks.lock_member(file)
+            if "error has occurred" in response.lower():
+                logging.error("MergeBrach", response)
+                return False
+        return True
+    
+    def remove_lock_files(self, files: list) -> bool:
+        """_summary_
+        Remove lock from files in the given list.
+        Args:
+            files (list): _description_
+
+        Returns:
+            bool: _description_
+        """
+        for file in files:
+            file = os.path.abspath(file)
+            # Remove lock from file
+            response = self.mks.unlock_member(file)
+            if "error has occurred" in response.lower():
+                logging.error("MergeBrach", response)
+                return False
+        return True

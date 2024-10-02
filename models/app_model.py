@@ -2,6 +2,7 @@ from utils.mks_utils.mks import MKS
 import logging
 from utils.dev_brach_utils.merge_brach_utils import MergeBrach
 from tkinter import messagebox
+import os
 
 class AppModel:
     def __init__(self):
@@ -206,9 +207,30 @@ class AppModel:
             logging.info("AppModel", "Copying Selected Files")
             status = self.merge_branch.merge_folder(temp_source_folder, temp_target_folder, selected)
             logging.info("AppModel", f"Merge status: {status}")
+            # List files that are copied
+            copied_files = []
+            for file in selected:
+                file = file.replace('source', 'target')
+                # get absolute path of the file
+                file = os.path.abspath(file)
+                copied_files.append(file)
             # Lock files
+            logging.info("AppModel", "Locking Files")
+            view.update_status("Locking Files...", "yellow")
+            status = self.merge_branch.lock_files(copied_files)
+            if not status:
+                self.status = "Merge Failed"
+                logging.error("AppModel", f"Lock files failed: {status}")
+                return False
             # Checkin files
             # Release locks
+            view.update_status("Releasing Locks...", "yellow")
+            logging.info("AppModel", "Releasing Locks")
+            status = self.merge_branch.remove_lock_files(copied_files)
+            if not status:
+                self.status = "Merge Failed"
+                logging.error("AppModel", f"Release locks failed: {status}")
+                return False
             # Drop sandboxes
             view.update_status("Dropping Sandboxes...", "yellow")
             logging.info("AppModel", "Dropping Sandboxes")
@@ -216,7 +238,6 @@ class AppModel:
             logging.info("AppModel", f"Drop source sandbox: {response}")
             response = self.mks.drop_sandbox(temp_target_folder)
             logging.info("AppModel", f"Drop target sandbox: {response}")
-            
             
         self.status = "Merge Complete"
         return True

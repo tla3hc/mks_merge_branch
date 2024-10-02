@@ -213,7 +213,7 @@ class MKS:
             raise  ProjectNotFoundError(errors=mks_responses)
 
 
-    def lock_member(self, member: str) -> str:
+    def lock_member(self, member: str) -> tuple:
         """
             Lock a member
             
@@ -234,7 +234,25 @@ class MKS:
         mks_responses = self.run(cmd)
         match = re.search(r":\s*(locked revision \d+\.\d+)", mks_responses)
         lock_version = match.group(1) if match else None
-        return lock_version
+        return mks_responses, lock_version
+    
+    def unlock_member(self, member: str) -> str:
+        """
+        Unlocks a specified member in the MKS (PTC Integrity) system.
+
+        This method constructs and runs a command to unlock a member, 
+        removing the lock if it exists. It then parses the command's 
+        response to extract the locked revision version, if any.
+
+        Args:
+            member (str): The path or identifier of the member to unlock.
+
+        Returns:
+            str: The locked revision version if found, otherwise None.
+        """
+        cmd = f'si unlock --action=remove -forceConfirm=yes "{member}"'
+        mks_responses = self.run(cmd)
+        return mks_responses
 
     def resynchronize(self, member: str) -> str:
         """
