@@ -91,6 +91,10 @@ class AppController:
         project_name = project_name.strip()
         source_branch = source_branch.strip()
         target_branch = target_branch.strip()
+        # Check if the source and target branches are similar
+        if source_branch == target_branch:
+            self.view.update_status("Source and target branches are the same", "red")
+            return
         status = self.model.merge_branches(self.view, self.model, project_name, source_branch, target_branch)
 
         # Merge branches in the model

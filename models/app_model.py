@@ -246,7 +246,6 @@ class AppModel:
             logging.info("AppModel", f"Drop target sandbox: {response}")
             
             #Popup a window showing the files that are successfully merged
-            view.show_message("Success")
             view.show_success_files(success_list)
             
         self.status = "Merge Complete"
