@@ -297,6 +297,7 @@ class MKS:
         Raises:
             ValueError: If the specified sandbox folder does not exist.
         """
+        sandbox_folder = os.path.abspath(sandbox_folder)
         # Validate sandbox folder
         if not os.path.exists(sandbox_folder):
             raise (f"Sandbox folder {sandbox_folder} does not exist")
@@ -327,10 +328,19 @@ class MKS:
         Returns:
             str: _description_
         """
+        sandbox_folder = os.path.abspath(sandbox_folder)
+        # Validate sandbox folder
+        if not os.path.exists(sandbox_folder):
+            raise (f"Sandbox folder {sandbox_folder} does not exist")
         # get current directory
         current_dir = os.getcwd()
         # cd to sandbox_folderp
         os.chdir(sandbox_folder)
+         # Check if the sandbox string is end with / or \ and remove it
+        if sandbox_folder.endswith("/") or sandbox_folder.endswith("\\"):
+            sandbox_folder = sandbox_folder[:-1]
+        
+        sandbox_folder = f"{sandbox_folder}/project.pj"
         cmd = f'si dropsandbox -f --delete=all "{sandbox_folder}"'
         
         mks_responses = self.run(cmd)
