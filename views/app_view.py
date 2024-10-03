@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 from tkinter import Listbox, MULTIPLE, Button
+import os
 
 class AppView:
     def __init__(self, root):
@@ -143,9 +144,8 @@ class AppView:
             new_revision = success_obj[file]['new']
             if not new_revision:
                 new_revision = '?'
-            if len(file_path.split('/')) > 2:
-                # Get short file name from full path ../last_parent_path/file_name
-                file_path = file_path.split('/')[-2] + '/' + file_path.split('/')[-1]
+            # using os get file name from file path
+            file_path = os.path.basename(file_path)
             listbox.insert(tk.END, f"{file_path} - {old_revision} -> {new_revision}")
         listbox.pack(pady=10)
         
