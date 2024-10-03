@@ -137,8 +137,12 @@ class AppView:
         # Add options to the Listbox
         for file in success_obj:
             file_path = file
-            old_revision = success_obj[file][0]
-            new_revision = success_obj[file][1]
+            old_revision = success_obj[file]['old']
+            if not old_revision:
+                old_revision = '?'
+            new_revision = success_obj[file]['new']
+            if not new_revision:
+                new_revision = '?'
             if len(file_path.split('/')) > 2:
                 # Get short file name from full path ../last_parent_path/file_name
                 file_path = file_path.split('/')[-2] + '/' + file_path.split('/')[-1]

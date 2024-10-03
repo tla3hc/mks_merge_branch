@@ -226,6 +226,8 @@ class AppModel:
                 # Get members revision before checkin
                 mem_revision = {}
                 for file in copied_files:
+                    if not file in mem_revision:
+                        mem_revision[file] = {}
                     mem_revision[file]['old'] = self.mks.get_member_revision(file)
                 # Checkin files
                 logging.info("AppModel", "Checkin Files")
@@ -237,6 +239,8 @@ class AppModel:
                     logging.error("AppModel", f"Checkin files failed: {status}")
                 # Get members revision after checkin
                 for file in copied_files:
+                    if not file in mem_revision:
+                        mem_revision[file] = {}
                     mem_revision[file]['new'] = self.mks.get_member_revision(file)
                 # Release locks
                 view.update_status("Releasing Locks...", "yellow")

@@ -217,11 +217,15 @@ class MKS:
             member_path = os.path.abspath(member_path)
             if not os.path.exists(member_path):
                 return None
-            cmd = f'si memberinfo "{member_path}"'
+            cmd = f'si memberinfo --quiet "{member_path}"'
             mks_responses = self.run(cmd)
             if "error has occurred" not in mks_responses.lower():
-                member_revision = re.search (r"Member Revision:\s*(.*)", mks_responses).group(1).strip()
-                return member_revision
+                match = re.search(r"Member Revision:\s+([\d.]+)", mks_responses)
+                if match:
+                    member_revision = match.group(1)  # Return only the revision number (1.11)
+                    return member_revision
+                else:
+                    return None
             else:
                 return None
         except Exception as ex:
