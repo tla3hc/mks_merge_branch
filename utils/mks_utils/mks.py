@@ -215,6 +215,9 @@ class MKS:
     def get_member_revision(self, member_path: str, **kwargs) -> str:
         try:
             add_args =  self.__gen_CLI_additional_args(kwargs)
+            member_path = os.path.abspath(member_path)
+            if not os.path.exists(member_path):
+                return None
             cmd = f'si memberinfo "{member_path}"'
             cmd += add_args
             mks_responses = self.run(cmd)
