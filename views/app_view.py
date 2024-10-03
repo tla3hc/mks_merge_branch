@@ -3,6 +3,7 @@ from tkinter import ttk
 from tkinter import messagebox
 from tkinter import Listbox, MULTIPLE, Button
 import os
+import logging
 
 class AppView:
     def __init__(self, root):
@@ -147,6 +148,7 @@ class AppView:
             # using os get file name from file path
             file_path = os.path.basename(file_path)
             listbox.insert(tk.END, f"{file_path} - {old_revision} -> {new_revision}")
+            logging.info(f"Succesfully merged file: {file_path} - {old_revision} -> {new_revision}")
         listbox.pack(pady=10)
         
         # Function to handle the selection

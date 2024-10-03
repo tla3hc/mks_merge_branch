@@ -231,6 +231,11 @@ class MKS:
         except Exception as ex:
             return None
     
+    def add_member(self, member_path: str, project: str, dev_path: str) -> str:
+        cmd = f'si projectadd [--forceConfirm=yes --project="{project}" --devpath="{dev_path}" "{member_path}"'
+        mks_responses = self.run(cmd)
+        return mks_responses
+    
     def lock_member(self, member: str) -> tuple:
         """
             Lock a member
@@ -400,6 +405,7 @@ class MKS:
         cmd = f'si ci --branchVariant --checkinUnchanged --cpid=:none --description="{description}" {member_path}'
         mks_responses = self.run(cmd)
         return mks_responses
+    
 if __name__ == "__main__":
     # import sys
     # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))

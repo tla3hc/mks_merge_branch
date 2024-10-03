@@ -246,7 +246,13 @@ class MergeBrach:
             if not os.path.exists(member_path):
                 logging.error("MergeBrach", f"Member {member_path} does not exist")
                 continue
-            response = self.mks.checkin_member(member_path, description)
+            # check if file is member, if not, add to member
+            member_revision = self.mks.get_member_revision(member_path)
+            if not member_revision:
+                # response = self.mks.add_member(member_path)
+                continue
+            else:
+                response = self.mks.checkin_member(member_path, description)
             if "error has occurred" in response.lower():
                 logging.error("MergeBrach", f"Error occurred while checking in member {member_path}")
                 return False
