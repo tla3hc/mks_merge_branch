@@ -212,14 +212,12 @@ class MKS:
         else:
             raise  ProjectNotFoundError(errors=mks_responses)
 
-    def get_member_revision(self, member_path: str, **kwargs) -> str:
+    def get_member_revision(self, member_path: str) -> str:
         try:
-            add_args =  self.__gen_CLI_additional_args(kwargs)
             member_path = os.path.abspath(member_path)
             if not os.path.exists(member_path):
                 return None
             cmd = f'si memberinfo "{member_path}"'
-            cmd += add_args
             mks_responses = self.run(cmd)
             if "error has occurred" not in mks_responses.lower():
                 member_revision = re.search (r"Member Revision:\s*(.*)", mks_responses).group(1).strip()

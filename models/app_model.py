@@ -146,114 +146,131 @@ class AppModel:
             11. Drop the temporary sandboxes.
             12. Update the status to "Merge Complete".
         """
-        view.update_status("Merging...", "yellow")
-        if not project_name or not self.source_branch or not self.target_branch:
-            self.status = "All inputs Required"
-            logging.info("AppModel", self.status)
-            return False
-        # Check if project name is end with / or \ and remove it
-        if project_name.endswith("/") or project_name.endswith("\\"):
-            project_name = project_name[:-1]
-        # Check if project name is end with /project.pj and add it if not
-        if not project_name.endswith("/project.pj"):
-            project_name += "/project.pj"
-        # Check if the project name is different from the current project name
-        if project_name != self.project_name:
-            # Get the project info
+        try:
+            view.update_status("Merging...", "yellow")
+            if not project_name or not self.source_branch or not self.target_branch:
+                self.status = "All inputs Required"
+                logging.info("AppModel", self.status)
+                return False
+            # Check if project name is end with / or \ and remove it
+            if project_name.endswith("/") or project_name.endswith("\\"):
+                project_name = project_name[:-1]
+            # Check if project name is end with /project.pj and add it if not
+            if not project_name.endswith("/project.pj"):
+                project_name += "/project.pj"
+            # Check if the project name is different from the current project name
+            if project_name != self.project_name:
+                # Get the project info
+                try:
+                    view.update_status("Checking Project...", "yellow")
+                    self.get_project_info(project_name)
+                except Exception as e:
+                    self.status = "Project Not Found"
+                    logging.error("AppModel", str(e))
+                    return False
+            # Check if the source and target branches are valid
+            if not self.set_source_branch(source_branch) or not self.set_target_branch(target_branch):
+                self.status = "Invalid Source or Target Branch"
+                logging.error("AppModel", self.status)
+                return False
+            # Merge the source branch into the target branch
+            view.update_status("Creating Sandboxes...", "yellow")
+            status, temp_folder = self.merge_branch.create_tmp_sandboxes(project_name, source_branch, target_branch)
+            if not status:
+                self.status = "Merge Failed"
+                return False
+            temp_source_folder = f"{temp_folder}/source"
+            temp_target_folder = f"{temp_folder}/target"
+            # Compare the source and target folders
+            view.update_status("Comparing Folders...", "yellow")
+            differences = self.merge_branch.compare_folders(temp_target_folder, temp_source_folder)
+            # Popup a window to ask user to select all or manually select files
+            result = messagebox.askyesno("Confirmation", "Do you want to merge ALL?")
+            if result:
+                # Copy and replace all files from source to target
+                logging.info("AppModel", "Copying files")
+                view.update_status("Copying Files...", "yellow")
+            else:
+                # Popup a window to ask user to select files manually
+                logging.info("AppModel", "Selecting files manually")
+                view.update_status("Selecting Files...", "yellow")
+                selected = view.select_files(differences)
+                logging.info("AppModel", selected)
+                # Make sandbox writable
+                view.update_status("Making Sandboxes Writable...", "yellow")
+                logging.info("AppModel", "Making Sandboxes Writable")
+                response = self.mks.make_sandbox_writable(temp_source_folder)
+                logging.info("AppModel", response)
+                response = self.mks.make_sandbox_writable(temp_target_folder)
+                logging.info("AppModel", response)
+                # Copy selected files from source to target
+                view.update_status("Copying Selected Files...", "yellow")
+                logging.info("AppModel", "Copying Selected Files")
+                status = self.merge_branch.merge_folder(temp_source_folder, temp_target_folder, selected)
+                logging.info("AppModel", f"Merge status: {status}")
+                # List files that are copied
+                copied_files = []
+                for file in selected:
+                    file = file.replace('source', 'target')
+                    # get absolute path of the file
+                    file = os.path.abspath(file)
+                    copied_files.append(file)
+                # Lock files
+                logging.info("AppModel", "Locking Files")
+                view.update_status("Locking Files...", "yellow")
+                status = self.merge_branch.lock_files(copied_files)
+                if not status:
+                    self.status = "Merge Failed"
+                    logging.error("AppModel", f"Lock files failed: {status}")
+                    return False
+                # Get members revision before checkin
+                mem_revision = {}
+                for file in copied_files:
+                    mem_revision[file]['old'] = self.mks.get_member_revision(file)
+                # Checkin files
+                logging.info("AppModel", "Checkin Files")
+                view.update_status("Checkin Files...", "yellow")
+                discprition = "Merged files from branch " + source_branch + " to " + target_branch
+                status, success_list = self.merge_branch.checkin_members(copied_files, discprition)
+                if not status:
+                    self.status = "Merge Failed"
+                    logging.error("AppModel", f"Checkin files failed: {status}")
+                # Get members revision after checkin
+                for file in copied_files:
+                    mem_revision[file]['new'] = self.mks.get_member_revision(file)
+                # Release locks
+                view.update_status("Releasing Locks...", "yellow")
+                logging.info("AppModel", "Releasing Locks")
+                status = self.merge_branch.remove_lock_files(copied_files)
+                if not status:
+                    self.status = "Merge Failed"
+                    logging.error("AppModel", f"Release locks failed: {status}")
+                # Drop sandboxes
+                view.update_status("Dropping Sandboxes...", "yellow")
+                logging.info("AppModel", "Dropping Sandboxes")
+                response = self.mks.drop_sandbox(temp_source_folder)
+                logging.info("AppModel", f"Drop source sandbox: {response}")
+                response = self.mks.drop_sandbox(temp_target_folder)
+                logging.info("AppModel", f"Drop target sandbox: {response}")
+                
+                #Popup a window showing the files that are successfully merged
+                view.show_success_files(mem_revision)
+                
+            self.status = "Merge Complete"
+            return True
+        except Exception as ex:
+            logging.error("AppModel", f"Merge Failed: {str(ex)}")
+            # Try to release locks and drop sandboxes if merge failed
             try:
-                view.update_status("Checking Project...", "yellow")
-                self.get_project_info(project_name)
+                if copied_files:
+                    self.merge_branch.remove_lock_files(copied_files)
+                if not temp_source_folder:
+                    current_tmp_folder = self.merge_branch.get_current_temp_folder()
+                    temp_source_folder = f"{current_tmp_folder}/source"
+                self.mks.drop_sandbox(temp_source_folder)
+                if not temp_target_folder:
+                    current_tmp_folder = self.merge_branch.get_current_temp_folder()
+                    temp_target_folder = f"{current_tmp_folder}/target"
+                self.mks.drop_sandbox(temp_target_folder)
             except Exception as e:
-                self.status = "Project Not Found"
-                logging.error("AppModel", str(e))
-                return False
-        # Check if the source and target branches are valid
-        if not self.set_source_branch(source_branch) or not self.set_target_branch(target_branch):
-            self.status = "Invalid Source or Target Branch"
-            logging.error("AppModel", self.status)
-            return False
-        # Merge the source branch into the target branch
-        view.update_status("Creating Sandboxes...", "yellow")
-        status, temp_folder = self.merge_branch.create_tmp_sandboxes(project_name, source_branch, target_branch)
-        if not status:
-            self.status = "Merge Failed"
-            return False
-        temp_source_folder = f"{temp_folder}/source"
-        temp_target_folder = f"{temp_folder}/target"
-        # Compare the source and target folders
-        view.update_status("Comparing Folders...", "yellow")
-        differences = self.merge_branch.compare_folders(temp_target_folder, temp_source_folder)
-        # Popup a window to ask user to select all or manually select files
-        result = messagebox.askyesno("Confirmation", "Do you want to merge ALL?")
-        if result:
-            # Copy and replace all files from source to target
-            logging.info("AppModel", "Copying files")
-            view.update_status("Copying Files...", "yellow")
-        else:
-            # Popup a window to ask user to select files manually
-            logging.info("AppModel", "Selecting files manually")
-            view.update_status("Selecting Files...", "yellow")
-            selected = view.select_files(differences)
-            logging.info("AppModel", selected)
-            # Make sandbox writable
-            view.update_status("Making Sandboxes Writable...", "yellow")
-            logging.info("AppModel", "Making Sandboxes Writable")
-            response = self.mks.make_sandbox_writable(temp_source_folder)
-            logging.info("AppModel", response)
-            response = self.mks.make_sandbox_writable(temp_target_folder)
-            logging.info("AppModel", response)
-            # Copy selected files from source to target
-            view.update_status("Copying Selected Files...", "yellow")
-            logging.info("AppModel", "Copying Selected Files")
-            status = self.merge_branch.merge_folder(temp_source_folder, temp_target_folder, selected)
-            logging.info("AppModel", f"Merge status: {status}")
-            # List files that are copied
-            copied_files = []
-            for file in selected:
-                file = file.replace('source', 'target')
-                # get absolute path of the file
-                file = os.path.abspath(file)
-                copied_files.append(file)
-            # Lock files
-            logging.info("AppModel", "Locking Files")
-            view.update_status("Locking Files...", "yellow")
-            status = self.merge_branch.lock_files(copied_files)
-            if not status:
-                self.status = "Merge Failed"
-                logging.error("AppModel", f"Lock files failed: {status}")
-                return False
-            # Get members revision before checkin
-            mem_revision = {}
-            for file in copied_files:
-                mem_revision[file]['old'] = self.mks.get_member_revision(file)
-            # Checkin files
-            logging.info("AppModel", "Checkin Files")
-            view.update_status("Checkin Files...", "yellow")
-            discprition = "Merged files from branch " + source_branch + " to " + target_branch
-            status, success_list = self.merge_branch.checkin_members(copied_files, discprition)
-            if not status:
-                self.status = "Merge Failed"
-                logging.error("AppModel", f"Checkin files failed: {status}")
-            # Get members revision after checkin
-            for file in copied_files:
-                mem_revision[file]['new'] = self.mks.get_member_revision(file)
-            # Release locks
-            view.update_status("Releasing Locks...", "yellow")
-            logging.info("AppModel", "Releasing Locks")
-            status = self.merge_branch.remove_lock_files(copied_files)
-            if not status:
-                self.status = "Merge Failed"
-                logging.error("AppModel", f"Release locks failed: {status}")
-            # Drop sandboxes
-            view.update_status("Dropping Sandboxes...", "yellow")
-            logging.info("AppModel", "Dropping Sandboxes")
-            response = self.mks.drop_sandbox(temp_source_folder)
-            logging.info("AppModel", f"Drop source sandbox: {response}")
-            response = self.mks.drop_sandbox(temp_target_folder)
-            logging.info("AppModel", f"Drop target sandbox: {response}")
-            
-            #Popup a window showing the files that are successfully merged
-            view.show_success_files(mem_revision)
-            
-        self.status = "Merge Complete"
-        return True
+                logging.error("AppModel", f"Cleanup failed: {str(e)}")

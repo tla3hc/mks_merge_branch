@@ -252,3 +252,6 @@ class MergeBrach:
                 return False
             success_list.append(member_path)
         return True, success_list
+    
+    def get_current_temp_folder(self) -> str:
+        return self._m_current_temp_folder
