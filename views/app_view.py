@@ -125,7 +125,7 @@ class AppView:
         # Return the selected values
         return selected_files
     
-    def show_success_files(self, file_list: list) -> bool:
+    def show_success_files(self, success_obj: object) -> bool:
         # Create a new Toplevel window (popup)
         popup = tk.Toplevel(self.root)
         popup.geometry("600x320")
@@ -135,8 +135,14 @@ class AppView:
         listbox = tk.Listbox(popup, height=15, width=80, selectmode=MULTIPLE)
        
         # Add options to the Listbox
-        for file in file_list:
-            listbox.insert(tk.END, file)
+        for file in success_obj:
+            file_path = file
+            old_revision = success_obj[file][0]
+            new_revision = success_obj[file][1]
+            if len(file_path.split('/')) > 2:
+                # Get short file name from full path ../last_parent_path/file_name
+                file_path = file_path.split('/')[-2] + '/' + file_path.split('/')[-1]
+            listbox.insert(tk.END, f"{file_path} - {old_revision} -> {new_revision}")
         listbox.pack(pady=10)
         
         # Function to handle the selection

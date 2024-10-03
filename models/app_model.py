@@ -222,6 +222,10 @@ class AppModel:
                 self.status = "Merge Failed"
                 logging.error("AppModel", f"Lock files failed: {status}")
                 return False
+            # Get members revision before checkin
+            mem_revision = {}
+            for file in copied_files:
+                mem_revision[file]['old'] = self.mks.get_member_revision(file)
             # Checkin files
             logging.info("AppModel", "Checkin Files")
             view.update_status("Checkin Files...", "yellow")
@@ -230,6 +234,9 @@ class AppModel:
             if not status:
                 self.status = "Merge Failed"
                 logging.error("AppModel", f"Checkin files failed: {status}")
+            # Get members revision after checkin
+            for file in copied_files:
+                mem_revision[file]['new'] = self.mks.get_member_revision(file)
             # Release locks
             view.update_status("Releasing Locks...", "yellow")
             logging.info("AppModel", "Releasing Locks")
@@ -246,7 +253,7 @@ class AppModel:
             logging.info("AppModel", f"Drop target sandbox: {response}")
             
             #Popup a window showing the files that are successfully merged
-            view.show_success_files(success_list)
+            view.show_success_files(mem_revision)
             
         self.status = "Merge Complete"
         return True
