@@ -148,7 +148,7 @@ class AppView:
             # using os get file name from file path
             file_path = os.path.basename(file_path)
             listbox.insert(tk.END, f"{file_path} - {old_revision} -> {new_revision}")
-            logging.info(f"Succesfully merged file: {file_path} - {old_revision} -> {new_revision}")
+            logging.info("Succesfully merged file: ", f"{file_path} - {old_revision} -> {new_revision}")
         listbox.pack(pady=10)
         
         # Function to handle the selection
