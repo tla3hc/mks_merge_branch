@@ -14,6 +14,7 @@ class AppModel:
         self.mks = MKS()
         self.project = None
         self.merge_branch = MergeBrach()
+        self.mks_locked_files = []
     
     def get_project_info(self, project_name):
         try:
@@ -136,6 +137,17 @@ class AppModel:
             self.status = "Copying Selected Files..."
             logging.info("AppModel", "Copying Selected Files")
             status = self.merge_branch.merge_folder(temp_source_folder, temp_target_folder, selected)
+            if not status:
+                self.status = "Merge Failed"
+                # Drop sandboxes
+                # view.update_status("Dropping Sandboxes...", "yellow")
+                self.status = "Dropping Sandboxes..."
+                logging.info("AppModel", "Dropping Sandboxes")
+                response = self.mks.drop_sandbox(temp_source_folder)
+                logging.info("AppModel", f"Drop source sandbox: {response}")
+                response = self.mks.drop_sandbox(temp_target_folder)
+                logging.info("AppModel", f"Drop target sandbox: {response}")
+                return False
             logging.info("AppModel", f"Merge status: {status}")
             # List files that are copied
             copied_files = []
@@ -150,10 +162,17 @@ class AppModel:
             self.status = "Locking Files..."
             logging.info("AppModel", "Locking Files")
             status = self.merge_branch.lock_files(copied_files)
+            self.mks_locked_files = copied_files
             if not status:
                 self.status = "Merge Failed"
                 logging.error("AppModel", f"Lock files failed: {status}")
                 return False
+            # Get members revision before checkin
+            mem_revision = {}
+            for file in copied_files:
+                if not file in mem_revision:
+                    mem_revision[file] = {}
+                mem_revision[file]['old'] = self.mks.get_member_revision(file)
             # Checkin files
             logging.info("AppModel", "Checkin Files")
             # view.update_status("Checkin Files...", "yellow")
@@ -164,6 +183,12 @@ class AppModel:
             if not status:
                 self.status = "Merge Failed"
                 logging.error("AppModel", f"Checkin files failed: {status}")
+                success_list = []
+            # Get members revision after checkin
+            for file in copied_files:
+                if not file in mem_revision:
+                    mem_revision[file] = {}
+                mem_revision[file]['new'] = self.mks.get_member_revision(file)
             # Release locks
             # view.update_status("Releasing Locks...", "yellow")
             self.status = "Releasing Locks..."
@@ -172,6 +197,8 @@ class AppModel:
             if not status:
                 self.status = "Merge Failed"
                 logging.error("AppModel", f"Release locks failed: {status}")
+            else:
+                self.mks_locked_files = []
             # Drop sandboxes
             # view.update_status("Dropping Sandboxes...", "yellow")
             self.status = "Dropping Sandboxes..."
@@ -182,11 +209,12 @@ class AppModel:
             logging.info("AppModel", f"Drop target sandbox: {response}")
             
             #Popup a window showing the files that are successfully merged
-            view.show_success_files(success_list)
+            view.show_success_files(mem_revision)
+            return True
         except Exception as e:
             self.status = "Merge Failed"
             logging.error("AppModel", str(e))
-            return False
+            raise
     
     def merge_branches(self, view, model, project_name: str, source_branch: str, target_branch: str) -> bool:
         """
@@ -215,73 +243,91 @@ class AppModel:
             11. Drop the temporary sandboxes.
             12. Update the status to "Merge Complete".
         """
-        # view.update_status("Merging...", "yellow")
-        self.status = "Merging..."
-        if not project_name or not self.source_branch or not self.target_branch:
-            self.status = "All inputs Required"
-            logging.info("AppModel", self.status)
-            return False
-        # Check if project name is end with / or \ and remove it
-        if project_name.endswith("/") or project_name.endswith("\\"):
-            project_name = project_name[:-1]
-        # Check if project name is end with /project.pj and add it if not
-        if not project_name.endswith("/project.pj"):
-            project_name += "/project.pj"
-        # Check if the project name is different from the current project name
-        if project_name != self.project_name:
-            # Get the project info
-            try:
-                # view.update_status("Checking Project...", "yellow")
-                self.status = "Checking Project..."
-                logging.info("AppModel", "Checking Project")
-                self.get_project_info(project_name)
-            except Exception as e:
-                self.status = "Project Not Found"
-                logging.error("AppModel", str(e))
-                return False
-        # Check if the source and target branches are valid
-        if not self.set_source_branch(source_branch) or not self.set_target_branch(target_branch):
-            self.status = "Invalid Source or Target Branch"
-            logging.error("AppModel", self.status)
-            return False
-        # Merge the source branch into the target branch
-        # view.update_status("Creating Sandboxes...", "yellow")
-        self.status = "Creating Sandboxes..."
-        logging.info("AppModel", "Creating Sandboxes")
-        status, temp_folder = self.merge_branch.create_tmp_sandboxes(project_name, source_branch, target_branch)
-        if not status:
-            self.status = "Merge Failed"
-            return False
-        temp_source_folder = f"{temp_folder}/source"
-        temp_source_folder = os.path.abspath(temp_source_folder)
-        temp_target_folder = f"{temp_folder}/target"
-        temp_target_folder = os.path.abspath(temp_target_folder)
-        # Compare the source and target folders
-        # view.update_status("Comparing Folders...", "yellow")
-        self.status = "Comparing Folders..."
-        differences = self.merge_branch.compare_folders(temp_target_folder, temp_source_folder)
-        # Popup a window to ask user to select all or manually select files
-        result = messagebox.askyesno("Confirmation", "Do you want to merge ALL?")
-        if result:
-            # Copy and replace all files from source to target
-            logging.info("AppModel", "Merge all files")
-            self.status = "Merging All Files..."
-            self.__merge(view, differences, temp_source_folder, temp_target_folder, source_branch, target_branch)
-        else:
-            # Popup a window to ask user to select files manually
-            logging.info("AppModel", "Selecting files manually")
-            # view.update_status("Selecting Files...", "yellow")
-            self.status = "Selecting Files..."
-            logging.info("AppModel", "Selecting Files...")
-            selected = view.select_files(differences)
-            logging.info("AppModel", selected)
-            if selected:
-                self.__merge(view, selected, temp_source_folder, temp_target_folder, source_branch, target_branch)
-            else:
-                self.status = "Merge Canceled"
+        try:
+            # view.update_status("Merging...", "yellow")
+            self.status = "Merging..."
+            if not project_name or not self.source_branch or not self.target_branch:
+                self.status = "All inputs Required"
                 logging.info("AppModel", self.status)
-                return True
-            
-        self.status = "Merge Complete"
-        logging.info("AppModel", self.status)
-        return True
+                return False
+            # Check if project name is end with / or \ and remove it
+            if project_name.endswith("/") or project_name.endswith("\\"):
+                project_name = project_name[:-1]
+            # Check if project name is end with /project.pj and add it if not
+            if not project_name.endswith("/project.pj"):
+                project_name += "/project.pj"
+            # Check if the project name is different from the current project name
+            if project_name != self.project_name:
+                # Get the project info
+                try:
+                    # view.update_status("Checking Project...", "yellow")
+                    self.status = "Checking Project..."
+                    logging.info("AppModel", "Checking Project")
+                    self.get_project_info(project_name)
+                except Exception as e:
+                    self.status = "Project Not Found"
+                    logging.error("AppModel", str(e))
+                    return False
+            # Check if the source and target branches are valid
+            if not self.set_source_branch(source_branch) or not self.set_target_branch(target_branch):
+                self.status = "Invalid Source or Target Branch"
+                logging.error("AppModel", self.status)
+                return False
+            # Merge the source branch into the target branch
+            # view.update_status("Creating Sandboxes...", "yellow")
+            self.status = "Creating Sandboxes..."
+            logging.info("AppModel", "Creating Sandboxes")
+            status, temp_folder = self.merge_branch.create_tmp_sandboxes(project_name, source_branch, target_branch)
+            if not status:
+                self.status = "Merge Failed"
+                return False
+            temp_source_folder = f"{temp_folder}/source"
+            temp_source_folder = os.path.abspath(temp_source_folder)
+            temp_target_folder = f"{temp_folder}/target"
+            temp_target_folder = os.path.abspath(temp_target_folder)
+            # Compare the source and target folders
+            # view.update_status("Comparing Folders...", "yellow")
+            self.status = "Comparing Folders..."
+            differences = self.merge_branch.compare_folders(temp_target_folder, temp_source_folder)
+            # Popup a window to ask user to select all or manually select files
+            result = messagebox.askyesno("Confirmation", "Do you want to merge ALL?")
+            if result:
+                # Copy and replace all files from source to target
+                logging.info("AppModel", "Merge all files")
+                self.status = "Merging All Files..."
+                self.__merge(view, differences, temp_source_folder, temp_target_folder, source_branch, target_branch)
+            else:
+                # Popup a window to ask user to select files manually
+                logging.info("AppModel", "Selecting files manually")
+                # view.update_status("Selecting Files...", "yellow")
+                self.status = "Selecting Files..."
+                logging.info("AppModel", "Selecting Files...")
+                selected = view.select_files(differences)
+                logging.info("AppModel", selected)
+                if selected:
+                    self.__merge(view, selected, temp_source_folder, temp_target_folder, source_branch, target_branch)
+                else:
+                    self.status = "Merge Canceled"
+                    logging.info("AppModel", self.status)
+                    return True
+                
+            self.status = "Merge Complete"
+            logging.info("AppModel", self.status)
+            return True
+        except Exception as ex:
+            logging.error("AppModel", f"Merge Failed: {str(ex)}")
+            # Try to release locks and drop sandboxes if merge failed
+            try:
+                if self.mks_locked_files:
+                    self.merge_branch.remove_lock_files(self.mks_locked_files)
+                if not temp_source_folder:
+                    current_tmp_folder = self.merge_branch.get_current_temp_folder()
+                    temp_source_folder = f"{current_tmp_folder}/source"
+                self.mks.drop_sandbox(temp_source_folder)
+                if not temp_target_folder:
+                    current_tmp_folder = self.merge_branch.get_current_temp_folder()
+                    temp_target_folder = f"{current_tmp_folder}/target"
+                self.mks.drop_sandbox(temp_target_folder)
+            except Exception as e:
+                logging.error("AppModel", f"Cleanup failed: {str(e)}")
+                return False

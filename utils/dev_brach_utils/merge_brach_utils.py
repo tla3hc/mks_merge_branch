@@ -179,12 +179,10 @@ class MergeBrach:
             for file in diffent:
                 file = os.path.abspath(file)
                 source_file = file
-                if '/source/' in file:
-                    target_file = file.replace('/source/', '/target/')  # Replace source with target
-                elif '\\source\\' in file:
-                    target_file = file.replace('\\source\\', '\\target\\')  # Replace source with target
+                if f'{os.path.sep}source{os.path.sep}' in file:
+                    target_file = file.replace(f'{os.path.sep}source{os.path.sep}', f'{os.path.sep}target{os.path.sep}')  # Replace source with target
                 else:
-                    logging.error("MergeBrach", "File path is not valid")
+                    logging.error("MergeBrach", f"File path is not valid: {file}")
                     return False
                 # Check if file is exist in target folder 
                 if os.path.exists(target_file):
@@ -280,7 +278,13 @@ class MergeBrach:
             if not os.path.exists(member_path):
                 logging.error("MergeBrach", f"Member {member_path} does not exist")
                 continue
-            response = self.mks.checkin_member(member_path, description)
+            # check if file is member, if not, add to member
+            member_revision = self.mks.get_member_revision(member_path)
+            if not member_revision:
+                # response = self.mks.add_member(member_path)
+                continue
+            else:
+                response = self.mks.checkin_member(member_path, description)
             if "error has occurred" in response.lower():
                 logging.error("MergeBrach", f"Error occurred while checking in member {member_path}")
                 return False
@@ -289,3 +293,6 @@ class MergeBrach:
                 logging.info("MergeBrach", response)
             success_list.append(member_path)
         return True, success_list
+    
+    def get_current_temp_folder(self) -> str:
+        return self._m_current_temp_folder

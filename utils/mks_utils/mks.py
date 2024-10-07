@@ -212,7 +212,30 @@ class MKS:
         else:
             raise  ProjectNotFoundError(errors=mks_responses)
 
-
+    def get_member_revision(self, member_path: str) -> str:
+        try:
+            member_path = os.path.abspath(member_path)
+            if not os.path.exists(member_path):
+                return None
+            cmd = f'si memberinfo --quiet "{member_path}"'
+            mks_responses = self.run(cmd)
+            if "error has occurred" not in mks_responses.lower():
+                match = re.search(r"Member Revision:\s+([\d.]+)", mks_responses)
+                if match:
+                    member_revision = match.group(1)  # Return only the revision number (1.11)
+                    return member_revision
+                else:
+                    return None
+            else:
+                return None
+        except Exception as ex:
+            return None
+    
+    def add_member(self, member_path: str, project: str, dev_path: str) -> str:
+        cmd = f'si projectadd [--forceConfirm=yes --project="{project}" --devpath="{dev_path}" "{member_path}"'
+        mks_responses = self.run(cmd)
+        return mks_responses
+    
     def lock_member(self, member: str) -> tuple:
         """
             Lock a member
@@ -382,6 +405,7 @@ class MKS:
         cmd = f'si ci --branchVariant --checkinUnchanged --cpid=:none --description="{description}" {member_path}'
         mks_responses = self.run(cmd)
         return mks_responses
+    
 if __name__ == "__main__":
     # import sys
     # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))

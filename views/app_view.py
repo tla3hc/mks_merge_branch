@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 from tkinter import Listbox, MULTIPLE, Button
+import os
+import logging
 
 class AppView:
     def __init__(self, root):
@@ -128,7 +130,7 @@ class AppView:
         # Return the selected values
         return selected_files
     
-    def show_success_files(self, file_list: list) -> bool:
+    def show_success_files(self, success_obj: object) -> bool:
         # Create a new Toplevel window (popup)
         popup = tk.Toplevel(self.root)
         popup.geometry("600x320")
@@ -138,8 +140,18 @@ class AppView:
         listbox = tk.Listbox(popup, height=15, width=80, selectmode=MULTIPLE)
        
         # Add options to the Listbox
-        for file in file_list:
-            listbox.insert(tk.END, file)
+        for file in success_obj:
+            file_path = file
+            old_revision = success_obj[file]['old']
+            if not old_revision:
+                old_revision = '?'
+            new_revision = success_obj[file]['new']
+            if not new_revision:
+                new_revision = '?'
+            # using os get file name from file path
+            file_path = os.path.basename(file_path)
+            listbox.insert(tk.END, f"{file_path} - {old_revision} -> {new_revision}")
+            logging.info("Succesfully merged file: ", f"{file_path} - {old_revision} -> {new_revision}")
         listbox.pack(pady=10)
         
         # Function to handle the selection
@@ -155,7 +167,6 @@ class AppView:
        
         # Return the selected values
         return True
-    
         
     # Function to draw a circular light instead of square
     def _draw_circle(self, color):
