@@ -59,7 +59,7 @@ class MKS:
         except Exception as ex:
             logging.error('MKS', f"{ex}")
     
-    def connect (self, hostname: str, port: int, user: str, password:str, timeout = 5) -> bool:
+    def connect (self, hostname: str, port: int, user: str, password:str, timeout = 60) -> bool:
         """
         Connect to MKS server with the provided hostname, port, user, and password.
 
@@ -84,7 +84,7 @@ class MKS:
             logging.error('MKS', f"{ex}")
             return False
 
-    def run(self, cmd:str, timeout:int = 30) -> str:
+    def run(self, cmd:str, timeout:int = 120) -> str:
         """
             Run the specified command with a timeout.
 

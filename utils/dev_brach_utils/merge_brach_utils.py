@@ -103,12 +103,22 @@ class MergeBrach:
             self._m_current_temp_folder = f"{self._m_temp_folder}/{temp_folder_count}"
             # Create temporary sandbox folder
             source_sandbox_folder = f"{self._m_current_temp_folder}/source"
+            source_sandbox_folder = os.path.abspath(source_sandbox_folder)
             target_sandbox_folder = f"{self._m_current_temp_folder}/target"
+            target_sandbox_folder = os.path.abspath(target_sandbox_folder)  
             # Create sandboxes
+            logging.info("MergeBrach", "Creating temporary sandboxes")
+            logging.info("MergeBrach", f"Source branch: {source_branch}")  
+            logging.info("MergeBrach", f"Source sandbox folder: {source_sandbox_folder}")
             status = self.sandbox.create_sandbox(project, source_sandbox_folder, source_branch)
+            logging.info("MergeBrach", f"Created source sandbox: {status}")
             if not status:
                 return False, ""
+            logging.info("MergeBrach", f"Creating target sandbox")
+            logging.info("MergeBrach", f"Target branch: {target_branch}")
+            logging.info("MergeBrach", f"Target sandbox folder: {target_sandbox_folder}")
             status = self.sandbox.create_sandbox(project, target_sandbox_folder, target_branch)
+            logging.info("MergeBrach", f"Created target sandbox: {status}")
             if not status:
                 return False, ""
             return True, self._m_current_temp_folder
@@ -164,19 +174,32 @@ class MergeBrach:
             logging.error("MergeBrach", "Source or Target folder is not exist")
             return False
         try:
+            logging.info("MergeBrach", "Start merging folders")
             # Copy and replace all files from source to target
             for file in diffent:
                 file = os.path.abspath(file)
                 source_file = file
-                target_file = file.replace('/source/', '/target/')  # Replace source with target
+                if '/source/' in file:
+                    target_file = file.replace('/source/', '/target/')  # Replace source with target
+                elif '\\source\\' in file:
+                    target_file = file.replace('\\source\\', '\\target\\')  # Replace source with target
+                else:
+                    logging.error("MergeBrach", "File path is not valid")
+                    return False
                 # Check if file is exist in target folder 
                 if os.path.exists(target_file):
+                    logging.info("MergeBrach", f"File {target_file} is exist in target folder")
                     # Delete file using os.remove
                     os.remove(target_file)
+                    logging.info("MergeBrach", f"File {target_file} deleted")
                 # Copy file using shutil.copy
                 if os.path.exists(source_file):
                     shutil.copy(source_file, target_file)
                     logging.info("MergeBrach", f"File {source_file} copied to {target_file}")
+                else:
+                    logging.error("MergeBrach", f"File {source_file} is not exist")
+                    return False
+            logging.info("MergeBrach", "Merge folders completed")
             return True
         except Exception as e:
             logging.error("MergeBrach", str(e))
@@ -194,11 +217,15 @@ class MergeBrach:
         try:
             for file in files:
                 file = os.path.abspath(file)
+                file_name = os.path.basename(file)
+                logging.info("MergeBrach", f"Locking file {file_name}")
                 # Lock file
                 response, lock_version = self.mks.lock_member(file)
                 if "error has occurred" in response.lower():
                     logging.error("MergeBrach", response)
                     return False
+                else:
+                    logging.info("MergeBrach", f"File {file_name} locked with version {lock_version}")
             return True
         except Exception as e:
             logging.error("MergeBrach", str(e))
@@ -216,11 +243,15 @@ class MergeBrach:
         try:
             for file in files:
                 file = os.path.abspath(file)
+                file_name = os.path.basename(file)
+                logging.info("MergeBrach", f"Removing lock from file {file_name}")
                 # Remove lock from file
                 response = self.mks.unlock_member(file)
                 if "error has occurred" in response.lower():
                     logging.error("MergeBrach", response)
                     return False
+                else:
+                    logging.info("MergeBrach", f"Lock removed from file {file_name}")
             return True
         except Exception as e:
             logging.error("MergeBrach", str(e))
@@ -243,6 +274,9 @@ class MergeBrach:
         success_list = []
         for member in member_path_list:
             member_path = os.path.abspath(member)
+            file_name = os.path.basename(member_path)   
+            logging.info("MergeBrach", f"Checking in member {file_name}")
+            # Check if member is exist
             if not os.path.exists(member_path):
                 logging.error("MergeBrach", f"Member {member_path} does not exist")
                 continue
@@ -250,5 +284,8 @@ class MergeBrach:
             if "error has occurred" in response.lower():
                 logging.error("MergeBrach", f"Error occurred while checking in member {member_path}")
                 return False
+            else:
+                logging.info("MergeBrach", f"Member {file_name} checked in")
+                logging.info("MergeBrach", response)
             success_list.append(member_path)
         return True, success_list

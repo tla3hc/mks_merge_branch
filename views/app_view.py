@@ -94,11 +94,14 @@ class AppView:
     def select_files(self, file_list):
         # Create a new Toplevel window (popup)
         popup = tk.Toplevel(self.root)
-        popup.geometry("600x320")
+        # popup.geometry("600x320")
+        popup.minsize(600, 320)
         popup.title("Select Files")
  
         # Create a Listbox widget
-        listbox = tk.Listbox(popup, height=15, width=80, selectmode=MULTIPLE)
+        x_scrollbar = tk.Scrollbar(popup, orient=tk.HORIZONTAL)
+        y_scrollbar = tk.Scrollbar(popup, orient=tk.VERTICAL)
+        listbox = tk.Listbox(popup, height=15, width=80, selectmode=MULTIPLE, xscrollcommand=x_scrollbar.set, yscrollcommand=y_scrollbar.set)
        
         # Add options to the Listbox
         for file in file_list:

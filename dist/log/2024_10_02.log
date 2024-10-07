@@ -1,0 +1,17 @@
+2024-10-02 14:08:13:             Logger             : Init[0m
+2024-10-02 14:08:13:            AppModel            : Init[0m
+2024-10-02 14:08:13:              MKS               : Checking current connection[0m
+2024-10-02 14:08:13:              MKS               : Current connection status:[0m
+2024-10-02 14:08:13: [31m             MKS               : [WinError 2] The system cannot find the file specified[0m
+2024-10-02 14:08:13:              MKS               : None[0m
+2024-10-02 14:08:13:           MergeBrach           : Init[0m
+2024-10-02 14:08:13:            Sandbox             : Init[0m
+2024-10-02 14:08:13:              MKS               : Checking current connection[0m
+2024-10-02 14:08:13:              MKS               : Current connection status:[0m
+2024-10-02 14:08:13: [31m             MKS               : [WinError 2] The system cannot find the file specified[0m
+2024-10-02 14:08:13:              MKS               : None[0m
+2024-10-02 14:08:13:              MKS               : Checking current connection[0m
+2024-10-02 14:08:13:              MKS               : Current connection status:[0m
+2024-10-02 14:08:13: [31m             MKS               : [WinError 2] The system cannot find the file specified[0m
+2024-10-02 14:08:13:              MKS               : None[0m
+2024-10-02 14:08:13:         AppController          : Init[0m
