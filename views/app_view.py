@@ -5,6 +5,7 @@ from tkinter import Listbox, MULTIPLE, Button
 import os
 import logging
 
+
 class AppView:
     def __init__(self, root):
         self.root = root
@@ -59,19 +60,48 @@ class AppView:
         self.merge_button.grid(row=3, column=3, padx=10, pady=10)
     
     def select_branch(self, branches):
+        """
+        Opens a popup window with a list of branches for the user to select from.
+        Args:
+            branches (list): A list of branch names to display in the Listbox.
+        Returns:
+            str: The name of the selected branch.
+        This method creates a Toplevel window containing a Listbox widget populated
+        with the provided branch names. The user can select a branch from the Listbox
+        and confirm their selection by clicking the "Select" button. The selected branch
+        name is then returned.
+        The popup window includes horizontal and vertical scrollbars for the Listbox,
+        and the Listbox is configured to expand with the window resize. The method
+        waits for the popup window to close before returning the selected value.
+        """
         # Create a new Toplevel window (popup)
         popup = tk.Toplevel(self.root)
-        popup.geometry("600x150")
+        popup.minsize(600, 320)
         popup.title("Select an branch")
 
         # Create a Listbox widget
-        listbox = tk.Listbox(popup, height=5, width=600, selectmode=tk.SINGLE)
+        x_scrollbar = tk.Scrollbar(popup, orient=tk.HORIZONTAL)
+        y_scrollbar = tk.Scrollbar(popup, orient=tk.VERTICAL)
+        listbox = tk.Listbox(popup, height=15, width=80, selectmode=tk.SINGLE, 
+                    xscrollcommand=x_scrollbar.set, yscrollcommand=y_scrollbar.set)
+        
+        # Configure scrollbars
+        x_scrollbar.config(command=listbox.xview)
+        y_scrollbar.config(command=listbox.yview)
+        
+        # Grid layout for listbox and scrollbars
+        listbox.grid(row=0, column=0, sticky="nsew")
+        x_scrollbar.grid(row=1, column=0, sticky="ew")
+        y_scrollbar.grid(row=0, column=1, sticky="ns")
+        
+        # Allow the listbox to expand with window resize
+        popup.grid_rowconfigure(0, weight=1)
+        popup.grid_columnconfigure(0, weight=1)
         
         # Add options to the Listbox
         options = branches
         for option in options:
             listbox.insert(tk.END, option)
-        listbox.pack(pady=10)
 
         # Variable to store the selected value
         selected_value = tk.StringVar()
@@ -85,7 +115,10 @@ class AppView:
 
         # Add a button to confirm selection
         select_button = ttk.Button(popup, text="Select", command=on_select)
-        select_button.pack(pady=10)
+        select_button.grid(row=2, column=0, pady=10)
+        
+        # Adjust the row height for the button
+        popup.grid_rowconfigure(2, weight=0)
         
         # Wait until the popup window is closed
         self.root.wait_window(popup)
@@ -94,21 +127,46 @@ class AppView:
         return selected_value.get()
     
     def select_files(self, file_list):
+        """
+        Opens a popup window with a list of files for the user to select from.
+        Args:
+            file_list (list): A list of file names to display in the Listbox.
+        Returns:
+            list: A list of selected file names.
+        The function creates a Toplevel window containing a Listbox widget with horizontal and vertical scrollbars.
+        The user can select multiple files from the Listbox. Upon clicking the "Select" button, the selected file names
+        are returned as a list. The popup window is closed after the selection is made.
+        """
         # Create a new Toplevel window (popup)
         popup = tk.Toplevel(self.root)
-        # popup.geometry("600x320")
         popup.minsize(600, 320)
         popup.title("Select Files")
  
         # Create a Listbox widget
         x_scrollbar = tk.Scrollbar(popup, orient=tk.HORIZONTAL)
         y_scrollbar = tk.Scrollbar(popup, orient=tk.VERTICAL)
-        listbox = tk.Listbox(popup, height=15, width=80, selectmode=MULTIPLE, xscrollcommand=x_scrollbar.set, yscrollcommand=y_scrollbar.set)
+        # listbox = tk.Listbox(popup, height=15, width=80, selectmode=MULTIPLE, xscrollcommand=x_scrollbar.set, yscrollcommand=y_scrollbar.set)
+        # Create the Listbox
+        listbox = tk.Listbox(popup, height=15, width=80, selectmode=tk.MULTIPLE, 
+                    xscrollcommand=x_scrollbar.set, yscrollcommand=y_scrollbar.set)
+
+        # Configure scrollbars
+        x_scrollbar.config(command=listbox.xview)
+        y_scrollbar.config(command=listbox.yview)
+        
+        # Grid layout for listbox and scrollbars
+        listbox.grid(row=0, column=0, sticky="nsew")
+        x_scrollbar.grid(row=1, column=0, sticky="ew")
+        y_scrollbar.grid(row=0, column=1, sticky="ns")
+        
+        # Allow the listbox to expand with window resize
+        popup.grid_rowconfigure(0, weight=1)
+        popup.grid_columnconfigure(0, weight=1)
        
         # Add options to the Listbox
         for file in file_list:
             listbox.insert(tk.END, file)
-        listbox.pack(pady=10)
+        # listbox.pack(pady=10)
  
         # Variable to store the selected values
         selected_files = []
@@ -122,7 +180,10 @@ class AppView:
  
         # Add a button to confirm selection
         select_button = ttk.Button(popup, text="Select", command=on_select)
-        select_button.pack(pady=10)
+        select_button.grid(row=2, column=0, pady=10)
+        
+        # Adjust the row height for the button
+        popup.grid_rowconfigure(2, weight=0)
        
         # Wait until the popup window is closed
         self.root.wait_window(popup)
@@ -131,13 +192,40 @@ class AppView:
         return selected_files
     
     def show_success_files(self, success_obj: object) -> bool:
+        """
+        Displays a popup window with a list of successfully merged files.
+        Args:
+            success_obj (object): A dictionary-like object containing file paths as keys and 
+                      dictionaries with 'old' and 'new' revision information as values.
+        Returns:
+            bool: Always returns True after the popup window is closed.
+        The popup window contains a Listbox widget that displays the file names along with their 
+        old and new revision numbers. The user can scroll through the list using horizontal and 
+        vertical scrollbars. An "OK" button is provided to close the popup window.
+        """
         # Create a new Toplevel window (popup)
         popup = tk.Toplevel(self.root)
-        popup.geometry("600x320")
+        popup.minsize(600, 320)
         popup.title("Merge Success Files")
  
         # Create a Listbox widget
-        listbox = tk.Listbox(popup, height=15, width=80, selectmode=MULTIPLE)
+        x_scrollbar = tk.Scrollbar(popup, orient=tk.HORIZONTAL)
+        y_scrollbar = tk.Scrollbar(popup, orient=tk.VERTICAL)
+        listbox = tk.Listbox(popup, height=15, width=80, selectmode=tk.MULTIPLE, 
+                    xscrollcommand=x_scrollbar.set, yscrollcommand=y_scrollbar.set)
+        
+        # Configure scrollbars
+        x_scrollbar.config(command=listbox.xview)
+        y_scrollbar.config(command=listbox.yview)
+        
+        # Grid layout for listbox and scrollbars
+        listbox.grid(row=0, column=0, sticky="nsew")
+        x_scrollbar.grid(row=1, column=0, sticky="ew")
+        y_scrollbar.grid(row=0, column=1, sticky="ns")
+        
+        # Allow the listbox to expand with window resize
+        popup.grid_rowconfigure(0, weight=1)
+        popup.grid_columnconfigure(0, weight=1)
        
         # Add options to the Listbox
         for file in success_obj:
@@ -147,12 +235,12 @@ class AppView:
                 old_revision = '?'
             new_revision = success_obj[file]['new']
             if not new_revision:
-                new_revision = '?'
+                # new_revision = '?'
+                continue
             # using os get file name from file path
             file_path = os.path.basename(file_path)
             listbox.insert(tk.END, f"{file_path} - {old_revision} -> {new_revision}")
             logging.info("Succesfully merged file: ", f"{file_path} - {old_revision} -> {new_revision}")
-        listbox.pack(pady=10)
         
         # Function to handle the selection
         def on_select():
@@ -160,7 +248,10 @@ class AppView:
  
         # Add a button to confirm selection
         select_button = ttk.Button(popup, text="OK", command=on_select)
-        select_button.pack(pady=10)
+        select_button.grid(row=2, column=0, pady=10)
+        
+        # Adjust the row height for the button
+        popup.grid_rowconfigure(2, weight=0)
        
         # Wait until the popup window is closed
         self.root.wait_window(popup)
@@ -177,6 +268,7 @@ class AppView:
         self.status_light.delete("all")  # Clear the canvas
         self._draw_circle(color)  # Draw the circle again with the new color
         self.status_text.config(text=status)
+        self.root.update_idletasks() 
 
     def set_check_pj_button_command(self, command):
         self.check_pj_button.config(command=command)

@@ -16,6 +16,8 @@ class AppController:
         self.view.set_merge_button_command(self.merge_branches)
 
     def check_project(self):
+        # selected = self.view.show_success_files(['a', 'b', 'c'])
+        self.view.update_status("Making Sandboxes Writable...", "yellow")
         # Get project name from view
         project_name = self.view.get_project_name()
         # Remove empty spaces from the project name

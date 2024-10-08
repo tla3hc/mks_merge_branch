@@ -17,7 +17,17 @@ class AppModel:
         self.mks_locked_files = []
     
     def get_project_info(self, project_name):
+        """
+        Retrieves project information for the specified project name and adds "Mainline" to the list of development paths.
+
+        Args:
+            project_name (str): The name of the project to retrieve information for.
+
+        Raises:
+            Exception: If an error occurs while retrieving the project information, it logs the error and re-raises the exception.
+        """
         try:
+            logging.info("AppModel", "Getting project info")
             self.project = self.mks.get_project_info(project_name)
             # add "Mainline" to the list of dev paths
             if self.project:
@@ -27,6 +37,19 @@ class AppModel:
             raise
 
     def set_project_name(self, project_name):
+        """
+        Sets the project name for the instance, ensuring it follows a specific format.
+
+        This method performs the following steps:
+        1. Removes any trailing '/' or '\' from the provided project name.
+        2. Ensures the project name ends with '/project.pj'. If not, appends '/project.pj' to the project name.
+
+        Args:
+            project_name (str): The name of the project to be set.
+
+        Attributes:
+            project_name (str): The formatted project name.
+        """
         # Check if project name end with / or \ and remove it
         if project_name.endswith("/") or project_name.endswith("\\"):
             project_name = project_name[:-1]
@@ -36,6 +59,25 @@ class AppModel:
         self.project_name = project_name
     
     def check_branch(self, branch: str) -> bool:
+        """
+        Checks if the given branch exists in the project's development paths.
+
+        Args:
+            branch (str): The name of the branch to check.
+
+        Returns:
+            bool: True if the branch is valid and exists in the project's development paths, False otherwise.
+
+        Raises:
+            Exception: If there is an error retrieving project information.
+
+        Logs:
+            - "Branch(es) Required": If the branch parameter is empty.
+            - "Valid Branch": If the branch exists in the project's development paths.
+            - "Project Not Found or Invalid Branch": If the project is not found or the branch is invalid.
+            - "Project Required": If the project name is not provided.
+            - "Branch Not Found": If the branch does not exist in the project's development paths.
+        """
         if not branch:
             self.status = "Branch(es) Required"
             logging.error("AppModel", self.status)
@@ -67,22 +109,57 @@ class AppModel:
         return False
     
     def set_source_branch(self, source: str) -> bool:
+        """
+        Sets the source branch if it is valid.
+
+        Args:
+            source (str): The name of the source branch to set.
+
+        Returns:
+            bool: True if the source branch is valid and set successfully, False otherwise.
+        """
         # Check if the source branch is valid
         if not self.check_branch(source):
+            logging.error("AppModel", "Invalid Source Branch")
             return False
         self.source_branch = source
         self.status = "Valid Source Branch"
+        logging.info("AppModel", f'Valid Source Branch: {source}')
         return True
 
     def set_target_branch(self, target: str) -> bool:
+        """
+        Sets the target branch if it is valid.
+
+        Args:
+            target (str): The name of the target branch to set.
+
+        Returns:
+            bool: True if the target branch is valid and set successfully, False otherwise.
+        """
         # Check if the target branch is valid
         if not self.check_branch(target):
+            logging.error("AppModel", "Invalid Target Branch")
             return False
         self.target_branch = target
         self.status = "Valid Target Branch"
+        logging.info("AppModel", f'Valid Target Branch: {target}')  
         return True
         
     def check_project(self):
+        """
+        Checks if the project name is set and validates the project in MKS.
+
+        This method performs the following steps:
+        1. Checks if the `project_name` attribute is set. If not, sets the `status` attribute to "Project Required",
+           logs an error, and returns False.
+        2. Attempts to retrieve project information using the `get_project_info` method. If an exception occurs,
+           sets the `status` attribute to "Project Not Found", logs the exception, and returns False.
+        3. If the project is successfully validated, sets the `status` attribute to "Valid Project" and returns True.
+
+        Returns:
+            bool: True if the project is valid, False otherwise.
+        """
         if not self.project_name:
             self.status = "Project Required"
             logging.error("AppModel", self.status)
@@ -95,9 +172,22 @@ class AppModel:
             logging.error("AppModel", str(e))
             return False
         self.status = "Valid Project"
+        logging.info("AppModel", f'Valid Project: {self.project_name}')
         return True
 
     def get_dev_paths(self):
+        """
+        Retrieves the development paths for the current project.
+
+        This method checks if the project is set and retrieves the project information
+        if necessary. It handles various error conditions and logs appropriate error
+        messages. If the project has no development paths, it updates the status and
+        logs an error.
+
+        Returns:
+            list: A list of development paths for the current project. Returns an empty
+            list if the project is not found, not set, or has no development paths.
+        """
         if not self.project:
             # if the project name is set, get the project info
             if self.project_name:
@@ -121,27 +211,51 @@ class AppModel:
         return self.status
     
     def __merge(self, view: object, differences: list, temp_source_folder: str, temp_target_folder: str, source_branch: str, target_branch: str) -> bool:
+        """
+        Merges differences from a source branch to a target branch.
+        Args:
+            view (object): The view object to update status and show success files.
+            differences (list): List of files that have differences to be merged.
+            temp_source_folder (str): Temporary folder path for the source branch.
+            temp_target_folder (str): Temporary folder path for the target branch.
+            source_branch (str): The name of the source branch.
+            target_branch (str): The name of the target branch.
+        Returns:
+            bool: True if the merge is successful, False otherwise.
+        Raises:
+            Exception: If any error occurs during the merge process.
+        The method performs the following steps:
+        1. Makes the sandboxes writable.
+        2. Copies selected files from the source to the target folder.
+        3. Locks the copied files.
+        4. Gets the member revisions before check-in.
+        5. Checks in the copied files.
+        6. Gets the member revisions after check-in.
+        7. Releases the locks on the files.
+        8. Drops the sandboxes.
+        9. Shows a popup window with the files that were successfully merged.
+        """
         try:
             selected = differences
             logging.info("AppModel", selected)
             # Make sandbox writable
-            # view.update_status("Making Sandboxes Writable...", "yellow")
-            self.status = "Making Sandboxes Writable..."
+            view.update_status("Making Sandboxes Writable...", "yellow")
+            # self.status = "Making Sandboxes Writable..."
             logging.info("AppModel", "Making Sandboxes Writable")
             response = self.mks.make_sandbox_writable(temp_source_folder)
             logging.info("AppModel", response)
             response = self.mks.make_sandbox_writable(temp_target_folder)
             logging.info("AppModel", response)
             # Copy selected files from source to target
-            # view.update_status("Copying Selected Files...", "yellow")
+            view.update_status("Copying Selected Files...", "yellow")
             self.status = "Copying Selected Files..."
             logging.info("AppModel", "Copying Selected Files")
             status = self.merge_branch.merge_folder(temp_source_folder, temp_target_folder, selected)
             if not status:
                 self.status = "Merge Failed"
                 # Drop sandboxes
-                # view.update_status("Dropping Sandboxes...", "yellow")
-                self.status = "Dropping Sandboxes..."
+                view.update_status("Dropping Sandboxes...", "yellow")
+                # self.status = "Dropping Sandboxes..."
                 logging.info("AppModel", "Dropping Sandboxes")
                 response = self.mks.drop_sandbox(temp_source_folder)
                 logging.info("AppModel", f"Drop source sandbox: {response}")
@@ -158,8 +272,8 @@ class AppModel:
                 copied_files.append(file)
             # Lock files
             logging.info("AppModel", "Locking Files")
-            # view.update_status("Locking Files...", "yellow")
-            self.status = "Locking Files..."
+            view.update_status("Locking Files...", "yellow")
+            # self.status = "Locking Files..."
             logging.info("AppModel", "Locking Files")
             status = self.merge_branch.lock_files(copied_files)
             self.mks_locked_files = copied_files
@@ -175,8 +289,8 @@ class AppModel:
                 mem_revision[file]['old'] = self.mks.get_member_revision(file)
             # Checkin files
             logging.info("AppModel", "Checkin Files")
-            # view.update_status("Checkin Files...", "yellow")
-            self.status = "Checkin Files..."
+            view.update_status("Checkin Files...", "yellow")
+            # self.status = "Checkin Files..."
             logging.info("AppModel", "Checkin Files")
             discprition = "Merged files from branch " + source_branch + " to " + target_branch
             status, success_list = self.merge_branch.checkin_members(copied_files, discprition)
@@ -185,13 +299,12 @@ class AppModel:
                 logging.error("AppModel", f"Checkin files failed: {status}")
                 success_list = []
             # Get members revision after checkin
-            for file in copied_files:
-                if not file in mem_revision:
-                    mem_revision[file] = {}
-                mem_revision[file]['new'] = self.mks.get_member_revision(file)
+            for file in success_list:
+                if file in mem_revision:
+                    mem_revision[file]['new'] = self.mks.get_member_revision(file)
             # Release locks
-            # view.update_status("Releasing Locks...", "yellow")
-            self.status = "Releasing Locks..."
+            view.update_status("Releasing Locks...", "yellow")
+            # self.status = "Releasing Locks..."
             logging.info("AppModel", "Releasing Locks")
             status = self.merge_branch.remove_lock_files(copied_files)
             if not status:
@@ -200,8 +313,8 @@ class AppModel:
             else:
                 self.mks_locked_files = []
             # Drop sandboxes
-            # view.update_status("Dropping Sandboxes...", "yellow")
-            self.status = "Dropping Sandboxes..."
+            view.update_status("Dropping Sandboxes...", "yellow")
+            # self.status = "Dropping Sandboxes..."
             logging.info("AppModel", "Dropping Sandboxes")
             response = self.mks.drop_sandbox(temp_source_folder)
             logging.info("AppModel", f"Drop source sandbox: {response}")
@@ -244,8 +357,10 @@ class AppModel:
             12. Update the status to "Merge Complete".
         """
         try:
-            # view.update_status("Merging...", "yellow")
-            self.status = "Merging..."
+            view.update_status("Merging...", "yellow")
+            # self.status = "Merging..."
+            logging.info("AppModel", "#"*150)
+            logging.info("AppModel", "Merging...")
             if not project_name or not self.source_branch or not self.target_branch:
                 self.status = "All inputs Required"
                 logging.info("AppModel", self.status)
@@ -260,8 +375,8 @@ class AppModel:
             if project_name != self.project_name:
                 # Get the project info
                 try:
-                    # view.update_status("Checking Project...", "yellow")
-                    self.status = "Checking Project..."
+                    view.update_status("Checking Project...", "yellow")
+                    # self.status = "Checking Project..."
                     logging.info("AppModel", "Checking Project")
                     self.get_project_info(project_name)
                 except Exception as e:
@@ -274,8 +389,8 @@ class AppModel:
                 logging.error("AppModel", self.status)
                 return False
             # Merge the source branch into the target branch
-            # view.update_status("Creating Sandboxes...", "yellow")
-            self.status = "Creating Sandboxes..."
+            view.update_status("Creating Sandboxes...", "yellow")
+            # self.status = "Creating Sandboxes..."
             logging.info("AppModel", "Creating Sandboxes")
             status, temp_folder = self.merge_branch.create_tmp_sandboxes(project_name, source_branch, target_branch)
             if not status:
@@ -286,8 +401,8 @@ class AppModel:
             temp_target_folder = f"{temp_folder}/target"
             temp_target_folder = os.path.abspath(temp_target_folder)
             # Compare the source and target folders
-            # view.update_status("Comparing Folders...", "yellow")
-            self.status = "Comparing Folders..."
+            view.update_status("Comparing Folders...", "yellow")
+            # self.status = "Comparing Folders..."
             differences = self.merge_branch.compare_folders(temp_target_folder, temp_source_folder)
             # Popup a window to ask user to select all or manually select files
             result = messagebox.askyesno("Confirmation", "Do you want to merge ALL?")
@@ -299,8 +414,8 @@ class AppModel:
             else:
                 # Popup a window to ask user to select files manually
                 logging.info("AppModel", "Selecting files manually")
-                # view.update_status("Selecting Files...", "yellow")
-                self.status = "Selecting Files..."
+                view.update_status("Selecting Files...", "yellow")
+                # self.status = "Selecting Files..."
                 logging.info("AppModel", "Selecting Files...")
                 selected = view.select_files(differences)
                 logging.info("AppModel", selected)
