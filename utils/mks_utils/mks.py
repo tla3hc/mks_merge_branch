@@ -84,7 +84,7 @@ class MKS:
             logging.error('MKS', f"{ex}")
             return False
 
-    def run(self, cmd:str, timeout:int = 120) -> str:
+    def run(self, cmd:str, timeout:int = 600) -> str:
         """
             Run the specified command with a timeout.
 

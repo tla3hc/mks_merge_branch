@@ -266,6 +266,8 @@ class AppView:
     # Function to set the status light's color
     def update_status(self, status, color):
         self.status_light.delete("all")  # Clear the canvas
+        self.status_text.config(text="")
+        self.root.update_idletasks() 
         self._draw_circle(color)  # Draw the circle again with the new color
         self.status_text.config(text=status)
         self.root.update_idletasks() 

@@ -1,0 +1,37 @@
+2024-10-08 14:54:15:             Logger             : Init[0m
+2024-10-08 14:54:15:            AppModel            : Init[0m
+2024-10-08 14:54:15:              MKS               : Checking current connection[0m
+2024-10-08 14:54:15:              MKS               : Current connection status:[0m
+2024-10-08 14:54:15: [31m             MKS               : [WinError 2] The system cannot find the file specified[0m
+2024-10-08 14:54:15:              MKS               : None[0m
+2024-10-08 14:54:15:           MergeBrach           : Init[0m
+2024-10-08 14:54:15:          SandboxUtils          : Init[0m
+2024-10-08 14:54:15:              MKS               : Checking current connection[0m
+2024-10-08 14:54:15:              MKS               : Current connection status:[0m
+2024-10-08 14:54:15: [31m             MKS               : [WinError 2] The system cannot find the file specified[0m
+2024-10-08 14:54:15:              MKS               : None[0m
+2024-10-08 14:54:15:              MKS               : Checking current connection[0m
+2024-10-08 14:54:15:              MKS               : Current connection status:[0m
+2024-10-08 14:54:15: [31m             MKS               : [WinError 2] The system cannot find the file specified[0m
+2024-10-08 14:54:15:              MKS               : None[0m
+2024-10-08 14:54:15:         AppController          : Init[0m
+2024-10-08 14:54:22: [31m           AppModel            : Branch(es) Required[0m
+2024-10-08 14:54:22: [31m           AppModel            : Invalid Source Branch[0m
+2024-10-08 14:54:22: [31m           AppModel            : Branch(es) Required[0m
+2024-10-08 14:54:22: [31m           AppModel            : Invalid Source Branch[0m
+2024-10-08 14:54:22: [31m           AppModel            : Branch(es) Required[0m
+2024-10-08 14:54:22: [31m           AppModel            : Invalid Source Branch[0m
+2024-10-08 14:54:22: [31m           AppModel            : Branch(es) Required[0m
+2024-10-08 14:54:22: [31m           AppModel            : Invalid Source Branch[0m
+2024-10-08 14:54:23: [31m           AppModel            : Branch(es) Required[0m
+2024-10-08 14:54:23: [31m           AppModel            : Invalid Target Branch[0m
+2024-10-08 14:54:23: [31m           AppModel            : Branch(es) Required[0m
+2024-10-08 14:54:23: [31m           AppModel            : Invalid Target Branch[0m
+2024-10-08 14:54:23: [31m           AppModel            : Branch(es) Required[0m
+2024-10-08 14:54:23: [31m           AppModel            : Invalid Target Branch[0m
+2024-10-08 14:54:26: [31m           AppModel            : Branch(es) Required[0m
+2024-10-08 14:54:26: [31m           AppModel            : Invalid Source Branch[0m
+2024-10-08 14:54:27: [31m           AppModel            : Branch(es) Required[0m
+2024-10-08 14:54:27: [31m           AppModel            : Invalid Target Branch[0m
+2024-10-08 14:54:27: [31m           AppModel            : Branch(es) Required[0m
+2024-10-08 14:54:27: [31m           AppModel            : Invalid Target Branch[0m
