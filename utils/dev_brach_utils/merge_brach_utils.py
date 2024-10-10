@@ -217,6 +217,7 @@ class MergeBrach:
             Errors if a member does not exist or if an error occurs during the check-in process.
         """
         success_list = []
+        error_list = []
         for member in member_path_list:
             member_path = os.path.abspath(member)
             file_name = os.path.basename(member_path)   
@@ -224,22 +225,28 @@ class MergeBrach:
             # Check if member is exist
             if not os.path.exists(member_path):
                 logging.error("MergeBrach", f"Member {member_path} does not exist")
+                error_list.append(member_path)
                 continue
             # check if file is member, if not, add to member
             member_revision = self.mks.get_member_revision(member_path)
             if not member_revision:
-                # response = self.mks.add_member(member_path)
-                continue
+                response = self.mks.add_member(member_path)
+                if 'added' not in response.lower():
+                    logging.error("MergeBrach", f"Error occurred while adding member {member_path}")
+                    error_list.append(member_path)
+                else:
+                    logging.info("MergeBrach", f"Member {file_name} added")
+                    success_list.append(member_path)
             else:
                 response = self.mks.checkin_member(member_path, description)
-            if "error has occurred" in response.lower():
-                logging.error("MergeBrach", f"Error occurred while checking in member {member_path}")
-                return False
-            else:
-                logging.info("MergeBrach", f"Member {file_name} checked in")
-                logging.info("MergeBrach", response)
-            success_list.append(member_path)
-        return True, success_list
+                if "error has occurred" in response.lower():
+                    logging.error("MergeBrach", f"Error occurred while checking in member {member_path}")
+                    error_list.append(member_path)
+                else:
+                    logging.info("MergeBrach", f"Member {file_name} checked in")
+                    logging.info("MergeBrach", response)
+                    success_list.append(member_path)
+        return success_list, error_list
     
     def get_current_temp_folder(self) -> str:
         return self._m_current_temp_folder

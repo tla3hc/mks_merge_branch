@@ -293,11 +293,7 @@ class AppModel:
             # self.status = "Checkin Files..."
             logging.info("AppModel", "Checkin Files")
             discprition = "Merged files from branch " + source_branch + " to " + target_branch
-            status, success_list = self.merge_branch.checkin_members(copied_files, discprition)
-            if not status:
-                self.status = "Merge Failed"
-                logging.error("AppModel", f"Checkin files failed: {status}")
-                success_list = []
+            success_list, error_list = self.merge_branch.checkin_members(copied_files, discprition)
             # Get members revision after checkin
             for file in success_list:
                 if file in mem_revision:
@@ -322,7 +318,7 @@ class AppModel:
             logging.info("AppModel", f"Drop target sandbox: {response}")
             
             #Popup a window showing the files that are successfully merged
-            view.show_success_files(mem_revision)
+            view.show_merge_report(mem_revision, error_list)
             return True
         except Exception as e:
             self.status = "Merge Failed"

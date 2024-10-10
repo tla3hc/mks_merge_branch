@@ -1,0 +1,57 @@
+2024-10-10 17:40:32:             Logger             : Init[0m
+2024-10-10 17:40:32:            AppModel            : Init[0m
+2024-10-10 17:40:32:              MKS               : Checking current connection[0m
+2024-10-10 17:40:32:              MKS               : Current connection status:[0m
+2024-10-10 17:40:32: [31m             MKS               : [WinError 2] The system cannot find the file specified[0m
+2024-10-10 17:40:32:              MKS               : None[0m
+2024-10-10 17:40:32:           MergeBrach           : Init[0m
+2024-10-10 17:40:32:          SandboxUtils          : Init[0m
+2024-10-10 17:40:32:              MKS               : Checking current connection[0m
+2024-10-10 17:40:32:              MKS               : Current connection status:[0m
+2024-10-10 17:40:32: [31m             MKS               : [WinError 2] The system cannot find the file specified[0m
+2024-10-10 17:40:32:              MKS               : None[0m
+2024-10-10 17:40:32:              MKS               : Checking current connection[0m
+2024-10-10 17:40:32:              MKS               : Current connection status:[0m
+2024-10-10 17:40:32: [31m             MKS               : [WinError 2] The system cannot find the file specified[0m
+2024-10-10 17:40:32:              MKS               : None[0m
+2024-10-10 17:40:32:         AppController          : Init[0m
+2024-10-10 17:40:58:             Logger             : Init[0m
+2024-10-10 17:40:58:            AppModel            : Init[0m
+2024-10-10 17:40:58:              MKS               : Checking current connection[0m
+2024-10-10 17:40:58:              MKS               : Current connection status:[0m
+2024-10-10 17:40:58: [31m             MKS               : [WinError 2] The system cannot find the file specified[0m
+2024-10-10 17:40:58:              MKS               : None[0m
+2024-10-10 17:40:58:           MergeBrach           : Init[0m
+2024-10-10 17:40:58:          SandboxUtils          : Init[0m
+2024-10-10 17:40:58:              MKS               : Checking current connection[0m
+2024-10-10 17:40:58:              MKS               : Current connection status:[0m
+2024-10-10 17:40:58: [31m             MKS               : [WinError 2] The system cannot find the file specified[0m
+2024-10-10 17:40:58:              MKS               : None[0m
+2024-10-10 17:40:58:              MKS               : Checking current connection[0m
+2024-10-10 17:40:58:              MKS               : Current connection status:[0m
+2024-10-10 17:40:58: [31m             MKS               : [WinError 2] The system cannot find the file specified[0m
+2024-10-10 17:40:58:              MKS               : None[0m
+2024-10-10 17:40:58:         AppController          : Init[0m
+2024-10-10 17:41:00: [31m     Error merging file:       : a[0m
+2024-10-10 17:41:00: [31m     Error merging file:       : b[0m
+2024-10-10 17:41:00: [31m     Error merging file:       : c[0m
+2024-10-10 17:41:40:             Logger             : Init[0m
+2024-10-10 17:41:40:            AppModel            : Init[0m
+2024-10-10 17:41:40:              MKS               : Checking current connection[0m
+2024-10-10 17:41:40:              MKS               : Current connection status:[0m
+2024-10-10 17:41:40: [31m             MKS               : [WinError 2] The system cannot find the file specified[0m
+2024-10-10 17:41:40:              MKS               : None[0m
+2024-10-10 17:41:40:           MergeBrach           : Init[0m
+2024-10-10 17:41:40:          SandboxUtils          : Init[0m
+2024-10-10 17:41:40:              MKS               : Checking current connection[0m
+2024-10-10 17:41:40:              MKS               : Current connection status:[0m
+2024-10-10 17:41:40: [31m             MKS               : [WinError 2] The system cannot find the file specified[0m
+2024-10-10 17:41:40:              MKS               : None[0m
+2024-10-10 17:41:40:              MKS               : Checking current connection[0m
+2024-10-10 17:41:40:              MKS               : Current connection status:[0m
+2024-10-10 17:41:40: [31m             MKS               : [WinError 2] The system cannot find the file specified[0m
+2024-10-10 17:41:40:              MKS               : None[0m
+2024-10-10 17:41:40:         AppController          : Init[0m
+2024-10-10 17:41:41: [31m     Error merging file:       : a[0m
+2024-10-10 17:41:41: [31m     Error merging file:       : b[0m
+2024-10-10 17:41:41: [31m     Error merging file:       : c[0m

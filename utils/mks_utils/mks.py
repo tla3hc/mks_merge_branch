@@ -232,7 +232,7 @@ class MKS:
             return None
     
     def add_member(self, member_path: str, project: str, dev_path: str) -> str:
-        cmd = f'si projectadd [--forceConfirm=yes --project="{project}" --devpath="{dev_path}" "{member_path}"'
+        cmd = f'si add --forceConfirm=yes --description="Added by merging tool" "{member_path}"'
         mks_responses = self.run(cmd)
         return mks_responses
     

@@ -191,7 +191,7 @@ class AppView:
         # Return the selected values
         return selected_files
     
-    def show_success_files(self, success_obj: object) -> bool:
+    def show_merge_report(self, success_obj: object, error_list: list) -> bool:
         """
         Displays a popup window with a list of successfully merged files.
         Args:
@@ -206,7 +206,7 @@ class AppView:
         # Create a new Toplevel window (popup)
         popup = tk.Toplevel(self.root)
         popup.minsize(600, 320)
-        popup.title("Merge Success Files")
+        popup.title("Merge report")
  
         # Create a Listbox widget
         x_scrollbar = tk.Scrollbar(popup, orient=tk.HORIZONTAL)
@@ -235,12 +235,17 @@ class AppView:
                 old_revision = '?'
             new_revision = success_obj[file]['new']
             if not new_revision:
-                # new_revision = '?'
-                continue
+                new_revision = '?'
             # using os get file name from file path
             file_path = os.path.basename(file_path)
-            listbox.insert(tk.END, f"{file_path} - {old_revision} -> {new_revision}")
+            listbox.insert(tk.END, f"Succesfully merged file: {file_path} - {old_revision} -> {new_revision}")
             logging.info("Succesfully merged file: ", f"{file_path} - {old_revision} -> {new_revision}")
+        
+
+        for file in error_list:
+            error_message = f"Error merging file: {file}"
+            listbox.insert(tk.END, error_message)
+            logging.error("Error merging file: ", file)
         
         # Function to handle the selection
         def on_select():
