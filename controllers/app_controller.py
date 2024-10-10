@@ -17,7 +17,7 @@ class AppController:
 
     def check_project(self):
         # selected = self.view.show_merge_report({}, ['a', 'b', 'c'])
-        self.view.update_status("Making Sandboxes Writable...", "yellow")
+        self.view.update_status("Getting project info", "yellow")
         # Get project name from view
         project_name = self.view.get_project_name()
         # Remove empty spaces from the project name
