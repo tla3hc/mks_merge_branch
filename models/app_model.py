@@ -210,6 +210,73 @@ class AppModel:
     def get_status(self):
         return self.status
     
+    def __check_diff_is_code(self, diff: str) -> bool:
+        """
+        Check if the given diff path corresponds to a code file.
+
+        This method determines if the provided diff path string contains the folder "20_IMPL" 
+        and if the child folder of "20_IMPL" contains "SW_".
+
+        Args:
+            diff (str): The diff path string to check.
+
+        Returns:
+            bool: True if the diff path contains "20_IMPL" and its child folder contains "SW_", 
+                  False otherwise.
+        """
+        # The different file is code if its path contains folder "20_IMPL" and the foder child of "20_IMPL" contains "SW_"
+        # Split the path by os path separator
+        diff = diff.split(os.sep)
+        # Check if the path contains "20_IMPL" and "SW_"
+        if "20_IMPL" in diff:
+            if "SW_" in diff[diff.index("20_IMPL")+1]: 
+                return True
+        return False
+    
+    def __check_diff_is_model(self, diff: str) -> bool:
+        """
+        Check if the given file path corresponds to a model file.
+
+        A file is considered a model file if its path contains the folder "20_IMPL" 
+        and one of the following folders: "DataDic", "Model", or "Library".
+
+        Args:
+            diff (str): The file path to check.
+
+        Returns:
+            bool: True if the file path corresponds to a model file, False otherwise.
+        """
+        # The different file is model if its path contains folder "20_IMPL" and "DataDic" or "Model" or "Library"
+        # Split the path by os path separator
+        diff = diff.split(os.sep)
+        # Check if the path contains "20_IMPL" and "DataDic" or "Model" or "Library"
+        if "20_IMPL" in diff:
+            if "DataDic" in diff or "Model" in diff or "Library" in diff:
+                return True
+        return False
+    
+    def __check_diff_is_test(self, diff: str) -> bool:
+        """
+        Check if the given file path corresponds to a test file.
+
+        A file is considered a test file if its path contains the folder "30_T" 
+        and either "20_MGC" or "40_SCA".
+
+        Args:
+            diff (str): The file path to check.
+
+        Returns:
+            bool: True if the file path is a test file, False otherwise.
+        """
+        # The different file is test if its path contains folder "30_T" and "20_MGC" or "40_SCA"
+        # Split the path by os path separator
+        diff = diff.split(os.sep)
+        # Check if the path contains "30_T" and "20_MGC" or "40_SCA"
+        if "30_T" in diff:
+            if "20_MGC" in diff or "40_SCA" in diff:
+                return True
+        return False
+            
     def __merge(self, view: object, differences: list, temp_source_folder: str, temp_target_folder: str, source_branch: str, target_branch: str) -> bool:
         """
         Merges differences from a source branch to a target branch.
@@ -325,7 +392,7 @@ class AppModel:
             logging.error("AppModel", str(e))
             raise
     
-    def merge_branches(self, view, model, project_name: str, source_branch: str, target_branch: str) -> bool:
+    def merge_branches(self, view, model, project_name: str, source_branch: str, target_branch: str, merge_mode: int) -> bool:
         """
         Merges the source branch into the target branch for a given project.
         Args:
@@ -391,6 +458,7 @@ class AppModel:
             status, temp_folder = self.merge_branch.create_tmp_sandboxes(project_name, source_branch, target_branch)
             if not status:
                 self.status = "Merge Failed"
+                logging.error("AppModel", "Create Sandboxes Failed")
                 return False
             temp_source_folder = f"{temp_folder}/source"
             temp_source_folder = os.path.abspath(temp_source_folder)
@@ -400,6 +468,59 @@ class AppModel:
             view.update_status("Comparing Folders...", "yellow")
             # self.status = "Comparing Folders..."
             differences = self.merge_branch.compare_folders(temp_target_folder, temp_source_folder)
+            original_diff_len = len(differences)
+            if original_diff_len == 0:
+                view.update_status("2 sandboxes are identical", "red")
+                logging.info("AppModel", "2 sandboxes are identical, merge canceled")
+                return False
+            # TODO: Handle merge_mode
+            # Mode 0: Merge Model + Code + Test(SCA, MXAM)
+            if merge_mode == 0:
+                # Filter differences based on the merge mode
+                for diff in differences:
+                    if not self.__check_diff_is_code(diff) and not self.__check_diff_is_model(diff) and not self.__check_diff_is_test(diff):
+                        differences.remove(diff)
+                # Check if there are no differences left
+                if len(differences) == 0:
+                    view.update_status("No files to merge", "red")
+                    logging.info("AppModel", "No files to merge, merge canceled")
+                    return False
+            # Mode 1: Merge Model
+            elif merge_mode == 1:
+                # Filter differences based on the merge mode
+                for diff in differences:
+                    if not self.__check_diff_is_model(diff):
+                        differences.remove(diff)
+                # Check if there are no differences left
+                if len(differences) == 0:
+                    view.update_status("No model files to merge", "red")
+                    logging.info("AppModel", "No model files to merge, merge canceled")
+                    return False
+            # Mode 2: Merge Code
+            elif merge_mode == 2:
+                # Filter differences based on the merge mode
+                for diff in differences:
+                    if not self.__check_diff_is_code(diff):
+                        differences.remove(diff)
+                # Check if there are no differences left
+                if len(differences) == 0:
+                    view.update_status("No code files to merge", "red")
+                    logging.info("AppModel", "No code files to merge, merge canceled")
+                    return False
+            # Mode 3: Merge Test(SCA, MXAM)
+            elif merge_mode == 3:
+                # Filter differences based on the merge mode
+                for diff in differences:
+                    if not self.__check_diff_is_test(diff):
+                        differences.remove(diff)
+                # Check if there are no differences left
+                if len(differences) == 0:
+                    view.update_status("No test files to merge", "red")
+                    logging.info("AppModel", "No test files to merge, merge canceled")
+                    return False
+            # Default: Merge All
+            else:
+                pass
             # Popup a window to ask user to select all or manually select files
             result = messagebox.askyesno("Confirmation", "Do you want to merge ALL?")
             if result:

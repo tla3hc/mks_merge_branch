@@ -10,7 +10,8 @@ class AppView:
     def __init__(self, root):
         self.root = root
         self.root.title("Branch Merge Tool")
-        self.root.geometry("650x200")  # Increase the width of the window
+        self.root.geometry("650x235")  # Increase the width of the window
+        app_bg_color = root.cget("bg")  # Get the background color of the root window
 
         # 1st row: MKS Project label, input, and "Check" button
         self.project_label = ttk.Label(root, text="MKS Project:")
@@ -47,17 +48,29 @@ class AppView:
         
         self.check_target_branch_button = ttk.Button(root, text="Check")
         self.check_target_branch_button.grid(row=2, column=3, padx=10, pady=10)
+        
+        # 4th row:
+        # Add dropdown (combobox)
+        # Add "Mode" label
+        mode_label = tk.Label(root, text="Mode:")
+        mode_label.grid(row=3, column=0, padx=10, pady=10, sticky='e')
 
-        # 4th row: Circular Status light, status text, and "Merge" button
-        self.status_light = tk.Canvas(root, width=30, height=30, bg="white", highlightthickness=0)
-        self.status_light.grid(row=3, column=0, padx=10, pady=10)
-        self._draw_circle("grey")  # Draw circle for status light
-
-        self.status_text = ttk.Label(root, text="Idle")
-        self.status_text.grid(row=3, column=1, padx=10, pady=10, sticky="w")
+        mode_options = ["Model + Code + Test(SCA, MXAM)", "Model", "Code", "Test(SCA, MXAM)"]
+        self.mode_dropdown = ttk.Combobox(root, values=mode_options, justify="left", width=35, state='readonly')
+        self.mode_dropdown.grid(row=3, column=1, padx=10, pady=10, sticky="w")
+        self.mode_dropdown.current(0)  # Set default value
 
         self.merge_button = ttk.Button(root, text="Merge")
         self.merge_button.grid(row=3, column=3, padx=10, pady=10)
+        
+        # 5th row:
+        # Add status light
+        self.status_light = tk.Canvas(root, width=30, height=30, bg=app_bg_color, highlightthickness=0)
+        self.status_light.grid(row=4, column=0, padx=10, pady=10, sticky="ns")
+        self._draw_circle("grey")  # Draw circle for status light
+
+        self.status_text = ttk.Label(root, text="Idle")
+        self.status_text.grid(row=4, column=1, padx=10, pady=10, sticky="w")
     
     def select_branch(self, branches):
         """
@@ -303,6 +316,10 @@ class AppView:
 
     def get_target_branch(self):
         return self.target_input.get()
+    
+    def get_merge_mode(self):
+        # Return index of the selected mode
+        return self.mode_dropdown.current()
     
     def set_source_branch_input(self, branch):
         self.source_input.delete(0, tk.END)

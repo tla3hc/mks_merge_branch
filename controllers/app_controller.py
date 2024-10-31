@@ -89,6 +89,8 @@ class AppController:
         # Get source and target branches from view
         source_branch = self.view.get_source_branch()
         target_branch = self.view.get_target_branch()
+        # Get merge mode
+        merge_mode = self.view.get_merge_mode()
         # Remove empty spaces from the project name
         project_name = project_name.strip()
         source_branch = source_branch.strip()
@@ -97,7 +99,7 @@ class AppController:
         if source_branch == target_branch:
             self.view.update_status("Source and target branches are the same", "red")
             return
-        status = self.model.merge_branches(self.view, self.model, project_name, source_branch, target_branch)
+        status = self.model.merge_branches(self.view, self.model, project_name, source_branch, target_branch, merge_mode)
 
         # Merge branches in the model
         if status:
