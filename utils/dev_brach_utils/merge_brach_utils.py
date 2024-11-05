@@ -102,8 +102,13 @@ class MergeBrach:
 
         # Recursively compare subdirectories
         for subdir in comparison.common_dirs:
-            modified.extend(self.compare_folders(os.path.join(folder_a, subdir), os.path.join(folder_b, subdir)))
-
+            subdir_a = os.path.join(folder_a, subdir)
+            subdir_b = os.path.join(folder_b, subdir)
+            sub_modified, sub_new_files, sub_deleted_files = self.compare_folders(subdir_a, subdir_b)
+            modified.extend(sub_modified)
+            new_files.extend(sub_new_files)
+            deleted_files.extend(sub_deleted_files)
+            
         return modified, new_files, deleted_files
     
     def merge_folder(self, source_folder: str, target_folder: str, diffent: list) -> bool:
