@@ -139,7 +139,7 @@ class AppView:
         # Return the selected value
         return selected_value.get()
     
-    def select_files(self, file_list):
+    def select_files(self, file_list, title):
         """
         Opens a popup window with a list of files for the user to select from.
         Args:
@@ -153,7 +153,7 @@ class AppView:
         # Create a new Toplevel window (popup)
         popup = tk.Toplevel(self.root)
         popup.minsize(600, 320)
-        popup.title("Select Files")
+        popup.title(title)
  
         # Create a Listbox widget
         x_scrollbar = tk.Scrollbar(popup, orient=tk.HORIZONTAL)

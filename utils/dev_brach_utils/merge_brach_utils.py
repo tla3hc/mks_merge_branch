@@ -73,7 +73,7 @@ class MergeBrach:
             logging.error("MergeBrach", str(e))
             raise
     
-    def compare_folders(self, folder_a: str, folder_b: str) -> list:
+    def compare_folders(self, folder_a: str, folder_b: str) -> tuple:
         """
         Compare two folders recursively and list all different files, including new files.
         
@@ -81,28 +81,30 @@ class MergeBrach:
         :param folder_b: The path to the second folder (newer version)
         :return: A list of file paths that differ between the two folders.
         """
-        differences = []
+        modified = [] # List of different files (only modified files)
+        new_files = []  # List of new files in the new version
+        deleted_files = []  # List of deleted files in the new version
 
         # Compare the directories
         comparison = filecmp.dircmp(folder_a, folder_b)
 
         # Files only in folder_a (deleted in folder_b)
         for file in comparison.left_only:
-            differences.append(os.path.join(folder_a, file))
+            deleted_files.append(os.path.join(folder_a, file))
 
         # Files only in folder_b (new files in the new version)
         for file in comparison.right_only:
-            differences.append(os.path.join(folder_b, file))
+            new_files.append(os.path.join(folder_b, file))
 
         # Files that exist in both folders but differ
         for file in comparison.diff_files:
-            differences.append(os.path.join(folder_b, file))  # Append the path from the new version
+            modified.append(os.path.join(folder_b, file))  # Append the path from the new version
 
         # Recursively compare subdirectories
         for subdir in comparison.common_dirs:
-            differences.extend(self.compare_folders(os.path.join(folder_a, subdir), os.path.join(folder_b, subdir)))
+            modified.extend(self.compare_folders(os.path.join(folder_a, subdir), os.path.join(folder_b, subdir)))
 
-        return differences
+        return modified, new_files, deleted_files
     
     def merge_folder(self, source_folder: str, target_folder: str, diffent: list) -> bool:
         """_summary_

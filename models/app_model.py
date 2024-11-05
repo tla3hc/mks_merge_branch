@@ -467,8 +467,8 @@ class AppModel:
             # Compare the source and target folders
             view.update_status("Comparing Folders...", "yellow")
             # self.status = "Comparing Folders..."
-            differences = self.merge_branch.compare_folders(temp_target_folder, temp_source_folder)
-            original_diff_len = len(differences)
+            modified, new_files, deleted_files = self.merge_branch.compare_folders(temp_target_folder, temp_source_folder)
+            original_diff_len = len(modified)
             if original_diff_len == 0:
                 view.update_status("2 sandboxes are identical", "red")
                 logging.info("AppModel", "2 sandboxes are identical, merge canceled")
@@ -476,45 +476,45 @@ class AppModel:
             # TODO: Handle merge_mode
             # Mode 0: Merge Model + Code + Test(SCA, MXAM)
             if merge_mode == 0:
-                # Filter differences based on the merge mode
-                for diff in differences:
+                # Filter modified based on the merge mode
+                for diff in modified:
                     if not self.__check_diff_is_code(diff) and not self.__check_diff_is_model(diff) and not self.__check_diff_is_test(diff):
-                        differences.remove(diff)
-                # Check if there are no differences left
-                if len(differences) == 0:
+                        modified.remove(diff)
+                # Check if there are no modified left
+                if len(modified) == 0:
                     view.update_status("No files to merge", "red")
                     logging.info("AppModel", "No files to merge, merge canceled")
                     return False
             # Mode 1: Merge Model
             elif merge_mode == 1:
-                # Filter differences based on the merge mode
-                for diff in differences:
+                # Filter modified based on the merge mode
+                for diff in modified:
                     if not self.__check_diff_is_model(diff):
-                        differences.remove(diff)
-                # Check if there are no differences left
-                if len(differences) == 0:
+                        modified.remove(diff)
+                # Check if there are no modified left
+                if len(modified) == 0:
                     view.update_status("No model files to merge", "red")
                     logging.info("AppModel", "No model files to merge, merge canceled")
                     return False
             # Mode 2: Merge Code
             elif merge_mode == 2:
-                # Filter differences based on the merge mode
-                for diff in differences:
+                # Filter modified based on the merge mode
+                for diff in modified:
                     if not self.__check_diff_is_code(diff):
-                        differences.remove(diff)
-                # Check if there are no differences left
-                if len(differences) == 0:
+                        modified.remove(diff)
+                # Check if there are no modified left
+                if len(modified) == 0:
                     view.update_status("No code files to merge", "red")
                     logging.info("AppModel", "No code files to merge, merge canceled")
                     return False
             # Mode 3: Merge Test(SCA, MXAM)
             elif merge_mode == 3:
-                # Filter differences based on the merge mode
-                for diff in differences:
+                # Filter modified based on the merge mode
+                for diff in modified:
                     if not self.__check_diff_is_test(diff):
-                        differences.remove(diff)
-                # Check if there are no differences left
-                if len(differences) == 0:
+                        modified.remove(diff)
+                # Check if there are no modified left
+                if len(modified) == 0:
                     view.update_status("No test files to merge", "red")
                     logging.info("AppModel", "No test files to merge, merge canceled")
                     return False
@@ -527,14 +527,26 @@ class AppModel:
                 # Copy and replace all files from source to target
                 logging.info("AppModel", "Merge all files")
                 self.status = "Merging All Files..."
-                self.__merge(view, differences, temp_source_folder, temp_target_folder, source_branch, target_branch)
+                self.__merge(view, modified, temp_source_folder, temp_target_folder, source_branch, target_branch)
             else:
                 # Popup a window to ask user to select files manually
                 logging.info("AppModel", "Selecting files manually")
                 view.update_status("Selecting Files...", "yellow")
                 # self.status = "Selecting Files..."
                 logging.info("AppModel", "Selecting Files...")
-                selected = view.select_files(differences)
+                selected = []
+                # Select new files
+                if len(new_files) > 0:
+                    selected += view.select_files(new_files, "Select new files")
+                    logging.info("AppModel", f'Selected new files: {selected}')
+                # Select deleted files
+                if len(deleted_files) > 0:
+                    selected += view.select_files(deleted_files, "Select deleted files")
+                    logging.info("AppModel", f'Selected deleted files: {selected}')
+                # Select modified files
+                if len(modified) > 0:
+                    selected += view.select_files(modified, "Select modified files")
+                    logging.info("AppModel", f'Selected modified files: {selected}')
                 logging.info("AppModel", selected)
                 if selected:
                     self.__merge(view, selected, temp_source_folder, temp_target_folder, source_branch, target_branch)
