@@ -402,7 +402,7 @@ class MKS:
         Returns:
             list: The responses from the MKS command execution.
         """
-        cmd = f'si ci --branchVariant --checkinUnchanged --cpid=:none --description="{description}" {member_path}'
+        cmd = f'si ci --branchVariant --checkinUnchanged --cpid=:none --description="{description}" "{member_path}"'
         mks_responses = self.run(cmd)
         return mks_responses
     

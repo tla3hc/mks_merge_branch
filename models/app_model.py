@@ -580,7 +580,7 @@ class AppModel:
                         logging.info("AppModel", "No test files to merge, merge canceled")
                         raise Exception("No test files to merge, merge canceled")
             
-            logging.debug("AppModel", f"Modified files reduced from {original_modified_len} to {len(modified)}")
+            logging.debug("AppModel", f"Modified files reduced from {original_modified_len} to {len(merge_modified)}")
             # Popup a window to ask user to select all or manually select files
             result = messagebox.askyesno("Confirmation", "Do you want to merge ALL?")
             if result:
