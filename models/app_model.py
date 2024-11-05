@@ -459,7 +459,7 @@ class AppModel:
             if not status:
                 self.status = "Merge Failed"
                 logging.error("AppModel", "Create Sandboxes Failed")
-                return False
+                raise Exception("Create Sandboxes Failed")
             temp_source_folder = f"{temp_folder}/source"
             temp_source_folder = os.path.abspath(temp_source_folder)
             temp_target_folder = f"{temp_folder}/target"
@@ -471,146 +471,114 @@ class AppModel:
             original_modified_len = len(modified)
             original_new_files_len = len(new_files)
             original_deleted_files_len = len(deleted_files)
+            merge_modified = []
+            merge_new_files = []
+            merge_deled_files = []
             if original_modified_len == 0 and original_new_files_len == 0 and original_deleted_files_len == 0:
                 view.update_status("2 sandboxes are identical", "red")
                 logging.info("AppModel", "2 sandboxes are identical, merge canceled")
-                return False
+                # return False
+                raise Exception("2 sandboxes are identical, merge canceled")
             # TODO: Handle merge_mode
             # Mode 0: Merge Model + Code + Test(SCA, MXAM)
             if merge_mode == 0:
                 logging.debug("AppModel", f"Merge mode: {merge_mode} - Merge All")
                 # Filter modified based on the merge mode
                 for diff in modified:
-                    if not self.__check_diff_is_code(diff) and not self.__check_diff_is_model(diff) and not self.__check_diff_is_test(diff):
-                        logging.debug("AppModel", f"Remove {diff}")
-                        modified.remove(diff)
-                # Check if there are no modified left
-                if len(modified) == 0 and original_modified_len > 0:
-                    view.update_status("No files to merge", "red")
-                    logging.info("AppModel", "No files to merge, merge canceled")
-                    return False
+                    if self.__check_diff_is_code(diff) or self.__check_diff_is_model(diff) or self.__check_diff_is_test(diff):
+                        merge_modified.append(diff)
+                        logging.debug("AppModel", f"Add {diff}")
                 # Filter new files based on the merge mode
                 for diff in new_files:
-                    if not self.__check_diff_is_code(diff) and not self.__check_diff_is_model(diff) and not self.__check_diff_is_test(diff):
-                        logging.debug("AppModel", f"Remove {diff}")
-                        new_files.remove(diff)
-                # Check if there are no new files left
-                if len(new_files) == 0 and original_new_files_len > 0:
-                    view.update_status("No new files to merge", "red")
-                    logging.info("AppModel", "No new files to merge, merge canceled")
-                    return False
+                    if self.__check_diff_is_code(diff) or self.__check_diff_is_model(diff) or self.__check_diff_is_test(diff):
+                        merge_new_files.append(diff)
+                        logging.debug("AppModel", f"Add {diff}")
                 # Filter deleted files based on the merge mode
                 for diff in deleted_files:
-                    if not self.__check_diff_is_code(diff) and not self.__check_diff_is_model(diff) and not self.__check_diff_is_test(diff):
-                        logging.debug("AppModel", f"Remove {diff}")
-                        deleted_files.remove(diff)
-                # Check if there are no deleted files left
-                if len(deleted_files) == 0 and original_deleted_files_len > 0:
-                    view.update_status("No deleted files to merge", "red")
-                    logging.info("AppModel", "No deleted files to merge, merge canceled")
-                    return False
-                
+                    if self.__check_diff_is_code(diff) or self.__check_diff_is_model(diff) or self.__check_diff_is_test(diff):
+                        merge_deled_files.append(diff)
+                        logging.debug("AppModel", f"Add {diff}")
+                # Check if there are no files to merge
+                if len(merge_modified) == 0 and len(merge_new_files) == 0 and len(merge_deled_files) == 0:
+                    if original_modified_len > 0 or original_new_files_len > 0 or original_deleted_files_len > 0:
+                        view.update_status("No files to merge", "red")
+                        logging.info("AppModel", "No files to merge, merge canceled")
+                        raise Exception("No files to merge, merge canceled")
+                    
             # Mode 1: Merge Model
             elif merge_mode == 1:
                 logging.debug("AppModel", f"Merge mode: {merge_mode} - Merge Model")
                 # Filter modified based on the merge mode
                 for diff in modified:
-                    if not self.__check_diff_is_model(diff):
-                        modified.remove(diff)
-                        logging.debug("AppModel", f"Remove {diff}")
-                # Check if there are no modified left
-                if len(modified) == 0 and original_modified_len > 0:
-                    view.update_status("No model files to merge", "red")
-                    logging.info("AppModel", "No model files to merge, merge canceled")
-                    return False
+                    if self.__check_diff_is_model(diff):
+                        merge_modified.append(diff)
+                        logging.debug("AppModel", f"Add {diff}")
                 # Filter new files based on the merge mode
                 for diff in new_files:
-                    if not self.__check_diff_is_model(diff):
-                        new_files.remove(diff)
-                        logging.debug("AppModel", f"Remove {diff}")
-                # Check if there are no new files left
-                if len(new_files) == 0 and original_new_files_len > 0:
-                    view.update_status("No new model files to merge", "red")
-                    logging.info("AppModel", "No new model files to merge, merge canceled")
-                    return False
+                    if self.__check_diff_is_model(diff):
+                        merge_new_files.append(diff)
+                        logging.debug("AppModel", f"Add {diff}")
                 # Filter deleted files based on the merge mode
                 for diff in deleted_files:
-                    if not self.__check_diff_is_model(diff):
-                        deleted_files.remove(diff)
-                        logging.debug("AppModel", f"Remove {diff}")
-                # Check if there are no deleted files left
-                if len(deleted_files) == 0 and original_deleted_files_len > 0:
-                    view.update_status("No deleted model files to merge", "red")
-                    logging.info("AppModel", "No deleted model files to merge, merge canceled")
-                    return False
+                    if self.__check_diff_is_model(diff):
+                        merge_deled_files.append(diff)
+                        logging.debug("AppModel", f"Add {diff}")
+                # Check if there are no model files left
+                if len(merge_modified) == 0 and len(merge_new_files) == 0 and len(merge_deled_files) == 0:
+                    if original_modified_len > 0 or original_new_files_len > 0 or original_deleted_files_len > 0:
+                        view.update_status("No model files to merge", "red")
+                        logging.info("AppModel", "No model files to merge, merge canceled")
+                        raise Exception("No model files to merge, merge canceled")
             
             # Mode 2: Merge Code
             elif merge_mode == 2:
                 logging.debug("AppModel", f"Merge mode: {merge_mode} - Merge Code")
                 # Filter modified based on the merge mode
                 for diff in modified:
-                    if not self.__check_diff_is_code(diff):
-                        modified.remove(diff)
-                        logging.debug("AppModel", f"Remove {diff}")
-                # Check if there are no modified left
-                if len(modified) == 0 and original_modified_len > 0:
-                    view.update_status("No code files to merge", "red")
-                    logging.info("AppModel", "No code files to merge, merge canceled")
-                    return False
+                    if self.__check_diff_is_code(diff):
+                        merge_modified.append(diff)
+                        logging.debug("AppModel", f"Add {diff}")
                 # Filter new files based on the merge mode
                 for diff in new_files:
-                    if not self.__check_diff_is_code(diff):
-                        new_files.remove(diff)
-                        logging.debug("AppModel", f"Remove {diff}")
-                # Check if there are no new files left
-                if len(new_files) == 0 and original_new_files_len > 0:
-                    view.update_status("No new code files to merge", "red")
-                    logging.info("AppModel", "No new code files to merge, merge canceled")
-                    return False
+                    if self.__check_diff_is_code(diff):
+                        merge_new_files.append(diff)
+                        logging.debug("AppModel", f"Add {diff}")
                 # Filter deleted files based on the merge mode
                 for diff in deleted_files:
-                    if not self.__check_diff_is_code(diff):
-                        deleted_files.remove(diff)
-                        logging.debug("AppModel", f"Remove {diff}")
-                # Check if there are no deleted files left
-                if len(deleted_files) == 0 and original_deleted_files_len > 0:
-                    view.update_status("No deleted code files to merge", "red")
-                    logging.info("AppModel", "No deleted code files to merge, merge canceled")
-                    return False
+                    if self.__check_diff_is_code(diff):
+                        merge_deled_files.append(diff)
+                        logging.debug("AppModel", f"Add {diff}")
+                # Check if there are no code files left
+                if len(merge_modified) == 0 and len(merge_new_files) == 0 and len(merge_deled_files) == 0:
+                    if original_modified_len > 0 or original_new_files_len > 0 or original_deleted_files_len > 0:
+                        view.update_status("No code files to merge", "red")
+                        logging.info("AppModel", "No code files to merge, merge canceled")
+                        raise Exception("No code files to merge, merge canceled")
                 
             # Mode 3: Merge Test(SCA, MXAM)
             elif merge_mode == 3:
                 logging.debug("AppModel", f"Merge mode: {merge_mode} - Merge Test")
                 # Filter modified based on the merge mode
                 for diff in modified:
-                    if not self.__check_diff_is_test(diff):
-                        modified.remove(diff)
-                        logging.debug("AppModel", f"Remove {diff}")
-                # Check if there are no modified left
-                if len(modified) == 0 and original_modified_len > 0:
-                    view.update_status("No test files to merge", "red")
-                    logging.info("AppModel", "No test files to merge, merge canceled")
-                    return False
+                    if self.__check_diff_is_test(diff):
+                        merge_modified.append(diff)
+                        logging.debug("AppModel", f"Add {diff}")
                 # Filter new files based on the merge mode
                 for diff in new_files:
-                    if not self.__check_diff_is_test(diff):
-                        new_files.remove(diff)
-                        logging.debug("AppModel", f"Remove {diff}")
-                # Check if there are no new files left
-                if len(new_files) == 0 and original_new_files_len > 0:
-                    view.update_status("No new test files to merge", "red")
-                    logging.info("AppModel", "No new test files to merge, merge canceled")
-                    return False
+                    if self.__check_diff_is_test(diff):
+                        merge_new_files.append(diff)
+                        logging.debug("AppModel", f"Add {diff}")
                 # Filter deleted files based on the merge mode
                 for diff in deleted_files:
-                    if not self.__check_diff_is_test(diff):
-                        deleted_files.remove(diff)
-                        logging.debug("AppModel", f"Remove {diff}")
-                # Check if there are no deleted files left
-                if len(deleted_files) == 0 and original_deleted_files_len > 0:
-                    view.update_status("No deleted test files to merge", "red")
-                    logging.info("AppModel", "No deleted test files to merge, merge canceled")
-                    return False
+                    if self.__check_diff_is_test(diff):
+                        merge_deled_files.append(diff)
+                        logging.debug("AppModel", f"Add {diff}")
+                # Check if there are no test files left
+                if len(merge_modified) == 0 and len(merge_new_files) == 0 and len(merge_deled_files) == 0:
+                    if original_modified_len > 0 or original_new_files_len > 0 or original_deleted_files_len > 0:
+                        view.update_status("No test files to merge", "red")
+                        logging.info("AppModel", "No test files to merge, merge canceled")
+                        raise Exception("No test files to merge, merge canceled")
             
             logging.debug("AppModel", f"Modified files reduced from {original_modified_len} to {len(modified)}")
             # Popup a window to ask user to select all or manually select files
@@ -626,23 +594,23 @@ class AppModel:
                 view.update_status("Selecting Files...", "yellow")
                 # self.status = "Selecting Files..."
                 logging.info("AppModel", "Selecting Files...")
-                selected = []
+                selected_merge_files = []
                 # Select new files
-                if len(new_files) > 0:
-                    selected += view.select_files(new_files, "Select new files")
-                    logging.info("AppModel", f'Selected new files: {selected}')
+                if len(merge_new_files) > 0:
+                    selected_merge_files += view.select_files(merge_new_files, "Select new files")
+                    logging.info("AppModel", f'Selected new files: {selected_merge_files}')
                 # Select deleted files
-                if len(deleted_files) > 0:
-                    selected += view.select_files(deleted_files, "Select deleted files")
-                    logging.info("AppModel", f'Selected deleted files: {selected}')
+                if len(merge_deled_files) > 0:
+                    selected_merge_files += view.select_files(merge_deled_files, "Select deleted files")
+                    logging.info("AppModel", f'Selected deleted files: {selected_merge_files}')
                 # Select modified files
-                if len(modified) > 0:
-                    logging.debug("AppModel", f"Modified files: {len(modified)}")
-                    selected += view.select_files(modified, "Select modified files")
-                    logging.info("AppModel", f'Selected modified files: {selected}')
-                logging.info("AppModel", selected)
-                if selected:
-                    self.__merge(view, selected, temp_source_folder, temp_target_folder, source_branch, target_branch)
+                if len(merge_modified) > 0:
+                    logging.debug("AppModel", f"Modified files: {len(merge_modified)}")
+                    selected_merge_files += view.select_files(merge_modified, "Select modified files")
+                    logging.info("AppModel", f'Selected modified files: {selected_merge_files}')
+                logging.info("AppModel", selected_merge_files)
+                if selected_merge_files:
+                    self.__merge(view, selected_merge_files, temp_source_folder, temp_target_folder, source_branch, target_branch)
                 else:
                     self.status = "Merge Canceled"
                     # Raise exception to drop sandboxes
