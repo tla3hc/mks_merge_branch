@@ -30,7 +30,8 @@ def format_log(func):
 logging.info = format_log(logging.info)
 logging.warning = format_log(logging.warning)
 logging.error = format_log(logging.error)
- 
+logging.debug = format_log(logging.debug)
+
  
 class Logger:
    
@@ -44,7 +45,7 @@ class Logger:
         if not os.path.isdir(self.m_log_folder):
             os.makedirs(self.m_log_folder)
  
-        logging.basicConfig(filename=f'{self.m_log_folder}/{today}.log', encoding='utf-8', level=logging.INFO, force=True, format=FORMAT)
+        logging.basicConfig(filename=f'{self.m_log_folder}/{today}.log', encoding='utf-8', level=logging.DEBUG, force=True, format=FORMAT)
         logging.getLogger().addHandler(logging.StreamHandler())
         logging.info("Logger", 'Init')
  
@@ -56,3 +57,6 @@ class Logger:
        
     def error(self, data):
         logging.error("Logger", data)
+    
+    def debug(self, data):
+        logging.debug("Logger", data)

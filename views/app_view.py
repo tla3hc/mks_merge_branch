@@ -318,6 +318,7 @@ class AppView:
         return self.target_input.get()
     
     def get_merge_mode(self):
+        logging.info("Selected mode: ", self.mode_dropdown.current())
         # Return index of the selected mode
         return self.mode_dropdown.current()
     
